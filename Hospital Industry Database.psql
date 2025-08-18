@@ -1,0 +1,19 @@
+CREATE TYPE time_type
+	AS ENUM('Full-Time', 'Part-Time', 'On-Call');
+
+CREATE TYPE employment_type
+	AS ENUM('Permanent', 'Temporary', 'Contractor');
+
+CREATE TYPE direction
+	AS ENUM('South East', 'North East', 'South West', 'North West');
+
+CREATE TYPE patient_status
+	AS ENUM('Under Treatment', 'End of Life Care', 'Deceased', 'Discharged');
+
+CREATE TYPE severity
+	AS ENUM('Low Mortality', 'Medium Mortality', 'High Mortality');
+
+CREATE TYPE illness_status
+	AS ENUM('Improved', 'Worsened', 'Cured');
+
+CREATE TYPE smoking_usage
