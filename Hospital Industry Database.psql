@@ -17,3 +17,18 @@ CREATE TYPE illness_status
 	AS ENUM('Improved', 'Worsened', 'Cured');
 
 CREATE TYPE smoking_usage
+	AS ENUM('Trying to quit', 'Used to smoke', 'Doesn''t Smoke');
+
+CREATE TYPE alcohol_usage
+	AS ENUM('Doesn''t Drink', 'Monthly', 'Weekly', 'Daily')
+
+CREATE TYPE exercise_amount
+	AS ENUM('Sedentary', 'Daily', 'Weekly', 'Monthly');
+
+CREATE TYPE dietary_type
+	AS ENUM('Standard Western Diet', 'Vegan', 'Vegetarian', 'Pescatarian', 'Carnivore');
+
+CREATE TYPE recreational_usage
+	AS ENUM('Opioids', 'Cannabis', 'Stimulants', 'Depressants', 'Hallucinogens', 'Dissociatives', 'Inhalants');
+
+	
