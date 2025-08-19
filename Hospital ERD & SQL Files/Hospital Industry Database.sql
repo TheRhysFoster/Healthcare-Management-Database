@@ -1,4 +1,4 @@
--- * ENUM CREATION STARTS HERE * --
+-- ******************************** ENUM CREATION STARTS HERE ******************************** --
 
 CREATE TYPE time_type
 	AS ENUM('Full-Time', 'Part-Time', 'On-Call');
@@ -39,10 +39,11 @@ CREATE TYPE country
 CREATE TYPE appointment_status
 	AS ENUM('Cancelled', 'Did not attend', 'Attended', 'Rescheduled');
 
--- * ENUM CREATION ENDS HERE * --
+-- ******************************** ENUM CREATION ENDS HERE ******************************** --
 
 
--- * TABLE CREATION STARTS HERE * --
+
+-- ******************************** TABLE CREATION STARTS HERE ******************************** --
 
 CREATE TABLE city(
 	city_id SERIAL PRIMARY KEY,
@@ -215,4 +216,4 @@ CREATE TABLE appointment_result(
 	PRIMARY KEY(appointment_id, illness_id)
 );
 
--- * TABLE CREATION ENDS HERE * --
+-- ******************************** TABLE CREATION ENDS HERE ******************************** --
