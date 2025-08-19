@@ -36,6 +36,9 @@ CREATE TYPE recreational_usage
 CREATE TYPE country
 	AS ENUM('England', 'Wales', 'Northern Ireland', 'Scotland');
 
+CREATE TYPE appointment_status
+	AS ENUM('Cancelled', 'Did not attend', 'Attended', 'Rescheduled');
+
 -- * ENUM CREATION ENDS HERE * --
 
 
@@ -110,7 +113,8 @@ CREATE TABLE staff_profession(
 	time_type time_type NOT NULL,
 	employment_type employment_type NOT NULL,
 	start_date DATE NOT NULL,
-	end_date DATE
+	end_date DATE,
+	PRIMARY KEY(staff_id, profession_id, hospital_id)
 );
 
 CREATE TABLE staff(
@@ -160,6 +164,15 @@ CREATE TABLE patient_lifestyle(
 	notes TEXT
 );
 
+CREATE TABLE patient_medical(
+	patient_medical_id SERIAL PRIMARY KEY,
+	patient_id INT NOT NULL REFERENCES patient(patient_id),
+	illness_id INT NOT NULL REFERENCES illness(illness_id),
+	staff_id INT NOT NULL REFERENCES staff(staff_id),
+	illness_status illness_status NOT NULL,
+	notes TEXT
+);
+
 CREATE TABLE hospitalized(
 	hospitalization_id SERIAL PRIMARY KEY,
 	patient_id INT NOT NULL REFERENCES patient(patient_id),
@@ -176,8 +189,30 @@ CREATE TABLE hospitalization_cause(
 	PRIMARY KEY(hospitalization_id, illness_id)
 );
 
+CREATE TABLE appointment(
+	appointment_id SERIAL PRIMARY KEY,
+	patient_id INT NOT NULL REFERENCES patient(patient_id),
+	department_id INT NOT NULL REFERENCES department(department_id),
+	hospital_id INT NOT NULL REFERENCES hospital(hospital_id),
+	intervention_id INT NOT NULL REFERENCES intervention(intervention_id),
+	notes TEXT,
+	appointment_date TIMESTAMP NOT NULL,
+	appointment_status appointment_status
+);
 
+CREATE TABLE staff_appointment(
+	staff_id INT NOT NULL REFERENCES staff(staff_id),
+	appointment_id INT NOT NULL REFERENCES appointment(appointment_id),
+	PRIMARY KEY(staff_id, appointment_id)
+);
 
-
+CREATE TABLE appointment_result(
+	appointment_id INT NOT NULL REFERENCES appointment(appointment_id),
+	illness_id INT NOT NULL REFERENCES illness(illness_id),
+	staff_id INT NOT NULL REFERENCES staff(staff_id),
+	notes TEXT,
+	confirmed_date TIMESTAMP,
+	PRIMARY KEY(appointment_id, illness_id)
+);
 
 -- * TABLE CREATION ENDS HERE * --
