@@ -365,8 +365,9 @@ INSERT INTO
 			('Ultrasound', 'Creates internal images of body using high frequency sound waves'),
 			('Magnetic Resonance Imaging (MRI)', 'Creates internal images of body using magnets and radio waves'),
 			('Computed Tomography (CT)', 'Creates internal images of the body using multiple x-ray shots'),
+			('X-Ray', 'Creates internal image of organs'),
 			('Blood / Lipid', 'Any procedure that involves blood analysis'),
-			('Injection', 'Any type of injection (IM, SC, IV, ID)');
+			('Injection / Drips', 'Any type of injection (IM, SC, IV, ID)');
 
 INSERT INTO
 	intervention(invervention_id, intervention_type_id, name, desc)
@@ -379,7 +380,17 @@ INSERT INTO
 			(6, 1, 'Pneumonectomy', 'Removal of one lung'), #Lung Surgery
 			(7, 1, 'Craniotomy', 'Skull opening for access to the brain'), #Brain Surgery
 			(8, 1, 'Aneurysm Clipping', 'Isolating a brain aneurysm'), #Brain Surgery
-			(9, 1, 'Brain Tumor Removal', 'Removal of a tumour in the brain') #Brain Surgery
+			(9, 1, 'Brain Tumor Removal', 'Removal of a tumour in the brain'), #Brain Surgery
+			(10, 2, 'Aortic Ultrasound', 'Scan of the aorta for abnormalities'), #Aorta Ultrasound
+			(11, 2, 'Penile Ultrasound', 'Scan of the penis for abnormalities'), #Penile Ultrasound
+			(12, 2, 'Neck Ultrasound', 'Scan of the neck for neck and throat abnormalities'), #Neck Ultrasound
+			(13, 3, 'Head MRI', 'Scan of the head for brain and neck abnormalities'), #Head MRI
+			(14, 4, 'Head CT', 'Scan of the head for brain and neck abnormalities'), #Head MRI
+			(15, 4, 'Chest CT', 'Scan of the chest to look for lung and heart abnormalities'), #Chest CT
+			(16, 5, 'Chest X-Ray', 'Scan of the chest to look for lung and heart abnormalities'), #Chest X-Ray
+			(17, 6, 'Blood Draw', 'Withdrawal of blood for analysis to look for abnormal values'), #Blood Draw
+			(18, 7, 'Chemotherapy Drip', 'Insertion of chemotherapy solution as a treatment for cancer'), #Chemotherapy Drip
+			(19, 7, 'Nutrient Drip', 'Insertion of nutrients to nourish patients unable to digest food and drink'); #Nutrient Drip
 
 INSERT INTO
 	illness_type(name, desc)
@@ -390,6 +401,11 @@ INSERT INTO
 			('Gastrointestinal', 'Issues involving the stomach and intestines'),
 			('Metabolic', 'Issues involving hormonal glands'),
 			('Haematological', 'Issues involving the blood');
+
+INSERT INTO
+	illness(intervention_id, intervention_type_id, name, desc)
+		VALUES
+			(1, 1, '')
 
 
 
