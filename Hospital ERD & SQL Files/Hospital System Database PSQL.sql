@@ -106,18 +106,6 @@ CREATE TABLE hospital_department(
 	PRIMARY KEY(hospital_id, department_id)
 );
 
-CREATE TABLE staff_profession(
-	staff_id INT NOT NULL REFERENCES staff(staff_id),
-	profession_id INT NOT NULL REFERENCES profession(profession_id),
-	hospital_id INT NOT NULL REFERENCES hospital(hospital_id),
-	yearly_salary NUMERIC(8,2) NOT NULL,
-	time_type time_type NOT NULL,
-	employment_type employment_type NOT NULL,
-	start_date DATE NOT NULL,
-	end_date DATE,
-	PRIMARY KEY(staff_id, profession_id, hospital_id)
-);
-
 CREATE TABLE staff(
 	staff_id SERIAL PRIMARY KEY,
 	address_id INT NOT NULL REFERENCES address(address_id),
@@ -128,6 +116,18 @@ CREATE TABLE staff(
 	telephone VARCHAR(11) NOT NULL UNIQUE,
 	email VARCHAR(255) NOT NULL UNIQUE,
 	date_of_birth DATE NOT NULL
+);
+
+CREATE TABLE staff_profession(
+	staff_id INT NOT NULL REFERENCES staff(staff_id),
+	profession_id INT NOT NULL REFERENCES profession(profession_id),
+	hospital_id INT NOT NULL REFERENCES hospital(hospital_id),
+	yearly_salary NUMERIC(8,2) NOT NULL,
+	time_type time_type NOT NULL,
+	employment_type employment_type NOT NULL,
+	start_date DATE NOT NULL,
+	end_date DATE,
+	PRIMARY KEY(staff_id, profession_id, hospital_id)
 );
 
 CREATE TABLE address(
@@ -163,6 +163,21 @@ CREATE TABLE patient_lifestyle(
 	exercise_amount exercise_amount NOT NULL,
 	dietary_type dietary_type NOT NULL,
 	notes TEXT
+);
+
+CREATE TABLE patient_indicator(
+	patient_indicator_id SERIAL PRIMARY KEY,
+	patient_id INT NOT NULL REFERENCES patient(patient_id),
+	hdl NUMERIC(5,2) NOT NULL,
+	ldl NUMERIC(5,2) NOT NULL,
+	triglycerides NUMERIC(5,2) NOT NULL,
+	total_cholesterol NUMERIC(5,2) NOT NULL,
+	systolic SMALLINT NOT NULL,
+	diastolic SMALLINT NOT NULL,
+	blood_sugar NUMERIC(5,2),
+	weight_kg NUMERIC(5,2),
+	height NUMERIC(5,2),
+	date_taken DATE
 );
 
 CREATE TABLE patient_medical(
