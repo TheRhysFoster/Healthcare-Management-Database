@@ -39,6 +39,10 @@ CREATE TYPE country
 CREATE TYPE appointment_status
 	AS ENUM('Cancelled', 'Did not attend', 'Attended', 'Rescheduled');
 
+CREATE TYPE positive_negative
+	AS ENUM('Positive', 'Negative');
+
+
 -- ******************************** ENUM CREATION ENDS HERE ******************************** --
 
 
@@ -130,6 +134,16 @@ CREATE TABLE staff_profession(
 	PRIMARY KEY(staff_id, profession_id, hospital_id)
 );
 
+CREATE TABLE shift(
+	shift_id SERIAL PRIMARY KEY,
+	staff_id INT NOT NULL REFERENCES staff(staff_id),
+	hospital_id INT NOT NULL REFERENCES hospital(hospital_id),
+	shift_start TIMESTAMP NOT NULL,
+	shift_end TIMESTAMP NOT NULL,
+	clocked_in TIMESTAMP,
+	clocked_out TIMESTAMP
+);
+
 CREATE TABLE address(
 	address_id SERIAL PRIMARY KEY,
 	city_id INT NOT NULL REFERENCES city(city_id),
@@ -180,8 +194,8 @@ CREATE TABLE patient_indicator(
 	date_taken DATE
 );
 
-CREATE TABLE patient_medical(
-	patient_medical_id SERIAL PRIMARY KEY,
+CREATE TABLE patient_illness(
+	patient_illness_id SERIAL PRIMARY KEY,
 	patient_id INT NOT NULL REFERENCES patient(patient_id),
 	illness_id INT NOT NULL REFERENCES illness(illness_id),
 	staff_id INT NOT NULL REFERENCES staff(staff_id),
@@ -231,4 +245,152 @@ CREATE TABLE appointment_result(
 	PRIMARY KEY(appointment_id, illness_id)
 );
 
+CREATE TABLE feedback(
+	feedback_id SERIAL PRIMARY KEY,
+	respondent_id INT NOT NULL REFERENCES staff(staff_id),
+	staff_id INT REFERENCES staff(staff_id),
+	patient_id INT REFERENCES patient(patient_id),
+	feedback_type positive_negative NOT NULL,
+	notes TEXT NOT NULL,
+	verified BOOL DEFAULT FALSE
+);
+
+CREATE TABLE staff_performance(
+	performance_id SERIAL PRIMARY KEY,
+	staff_id INT NOT NULL REFERENCES staff(staff_id),
+	performance_type postive_negative NOT NULL,
+	performance_desc TEXT NOT NULL
+);
+
 -- ******************************** TABLE CREATION ENDS HERE ******************************** --
+
+
+
+-- ******************************** DATA INSERTION STARTS HERE ******************************** --
+
+INSERT INTO 
+	city(name)
+		VALUES
+			('Bath'),
+			('Birmingham'),
+			('Bradford'),
+			('Brighton & Hove'),
+			('Bristol'),
+			('Cambridge'),
+			('Canterbury'),
+			('Carlisle'),
+			('Chelmsford'),
+			('Chester'),
+			('Chichester'),
+			('Colchester'),
+			('Coventry'),
+			('Derby'),
+			('Doncaster'),
+			('Durham'),
+			('Ely'),
+			('Exeter'),
+			('Gloucester'),
+			('Hereford'),
+			('Kingston upon Hull'),
+			('Lancaster'),
+			('Leeds'),
+			('Leicester'),
+			('Lichfield'),
+			('Lincoln'),
+			('Liverpool'),
+			('City of London'),
+			('Manchester'),
+			('Milton Keynes'),
+			('Newcastle upon Tyne'),
+			('Norwich'),
+			('Nottingham'),
+			('Oxford'),
+			('Peterborough'),
+			('Plymouth'),
+			('Portsmouth'),
+			('Preston'),
+			('Ripon'),
+			('Salford'),
+			('Salisbury'),
+			('Sheffield'),
+			('Southampton'),
+			('Southend-on-Sea'),
+			('St Albans'),
+			('Stoke-on-Trent'),
+			('Sunderland'),
+			('Truro'),
+			('Wakefield'),
+			('Wells'),
+			('Westminster'),
+			('Winchester'),
+			('Wolverhampton'),
+			('Worcester'),
+			('York'),
+			('Bangor'),
+			('Cardiff'),
+			('Newport'),
+			('St Asaph'),
+			('St Davids'),
+			('Swansea'),
+			('Wrexham'),
+			('Aberdeen'),
+			('Dundee'),
+			('Dunfermline'),
+			('Edinburgh'),
+			('Glasgow'),
+			('Inverness'),
+			('Perth'),
+			('Stirling'),
+			('Belfast'),
+			('Londonderry'),
+			('Lisburn'),
+			('Newry'),
+			('Armagh'),
+			('Bangor');
+
+INSERT INTO
+	department(name, desc)
+		VALUES
+			('Accident & Emergency', 'Department handling accidents and emergency illnesses'),
+			('Cardiology', 'Department focusing on heart health'),
+			('Oncology', 'Department focusing on cancer treatment'),
+			('Neurology', 'Department focusing on brain health'),
+			('Radiology', 'Department focusing on CT, MRI, Ultrasound & X-Ray for diagnostic purposes'),
+			('Gastroenterology', 'Department focusing on digestive health');
+
+INSERT INTO
+	intervention_type(name, desc)
+		VALUES
+			('Surgery', 'Covers any surgical operation of the body'),
+			('Ultrasound', 'Creates internal images of body using high frequency sound waves'),
+			('Magnetic Resonance Imaging (MRI)', 'Creates internal images of body using magnets and radio waves'),
+			('Computed Tomography (CT)', 'Creates internal images of the body using multiple x-ray shots'),
+			('Blood / Lipid', 'Any procedure that involves blood analysis'),
+			('Injection', 'Any type of injection (IM, SC, IV, ID)');
+
+INSERT INTO
+	intervention(invervention_id, intervention_type_id, name, desc)
+		VALUES
+			(1, 1, 'Heart Transplant', 'Replacing a failing heart with a healthier organ'), #Heart Surgery
+			(2, 1, 'Coronary Artery Stent', 'Placing a stent in the one or more heart arteries due to blockage / plaque build up'), #Heart Surgery
+			(3, 1, 'Valve Repair', 'Repairing one or more heart valves'), #Heart Surgery
+			(4, 1, 'Lung Transplant', 'Replacing one or more lungs with a healthier organ'), #Lung Surgery
+			(5, 1, 'Lobectomy', 'Removing a lobe of the lung'), #Lung Surgery
+			(6, 1, 'Pneumonectomy', 'Removal of one lung'), #Lung Surgery
+			(7, 1, 'Craniotomy', 'Skull opening for access to the brain'), #Brain Surgery
+			(8, 1, 'Aneurysm Clipping', 'Isolating a brain aneurysm'), #Brain Surgery
+			(9, 1, 'Brain Tumor Removal', 'Removal of a tumour in the brain') #Brain Surgery
+
+INSERT INTO
+	illness_type(name, desc)
+		VALUES
+			('Cardiovascular', 'Issues involving the heart'),
+			('Neurological', 'Issues involving the brain'),
+			('Respiratory', 'Issues involving lungs and airways'),
+			('Gastrointestinal', 'Issues involving the stomach and intestines'),
+			('Metabolic', 'Issues involving hormonal glands'),
+			('Haematological', 'Issues involving the blood');
+
+
+
+-- ******************************** DATA INSERTION ENDS HERE ******************************** --
