@@ -403,9 +403,17 @@ INSERT INTO
 			('Haematological', 'Issues involving the blood');
 
 INSERT INTO
-	illness(intervention_id, intervention_type_id, name, desc)
+	illness(illness_id, illness_type_id, name, desc)
 		VALUES
-			(1, 1, '')
+			(1, 1, 'Heart Failure', 'Heart disease beyond repair'),
+			(2, 1, 'Coronary Artery Disease', 'Build up of plaque in one or more arteries of the heart'),
+			(3, 1, 'Valve Stenosis', 'Valve unable to open fully limiting bloodflow'),
+			(4, 3, 'Lung Failure', 'Lung issues that are beyond repair'),
+			(5, 3, 'Lung Cancer', 'One or more cancerous tumours on part of the lungs'),
+			(6, 3, 'Lung Fungal Infection', 'Severe infection of the lungs'),
+			(7, 2, 'Brain Aneurysm', 'Aneurysm of any location in the brain'),
+			(8, 2, 'Brain Cancer', 'One or more cancerous tumours on the brain'),
+			(9, 4, '')
 
 
 
