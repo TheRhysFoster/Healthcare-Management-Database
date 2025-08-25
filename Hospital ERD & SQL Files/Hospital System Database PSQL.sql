@@ -22,7 +22,7 @@ CREATE TYPE smoking_usage
 	AS ENUM('Trying to quit', 'Used to smoke', 'None');
 
 CREATE TYPE alcohol_usage
-	AS ENUM('None', 'Monthly', 'Weekly', 'Daily')
+	AS ENUM('None', 'Monthly', 'Weekly', 'Daily');
 
 CREATE TYPE exercise_amount
 	AS ENUM('Sedentary', 'Daily', 'Weekly', 'Monthly');
@@ -57,43 +57,54 @@ CREATE TABLE city(
 	name VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE address(
+	address_id SERIAL PRIMARY KEY,
+	city_id INT NOT NULL REFERENCES city(city_id),
+	country country NOT NULL,
+	address_line_1 VARCHAR(150) NOT NULL,
+	address_line_2 VARCHAR(150),
+	postcode VARCHAR(8) NOT NULL,
+	direction direction NOT NULL
+);
+
 CREATE TABLE department(
 	department_id SERIAL PRIMARY KEY,
 	name VARCHAR(50) NOT NULL,
-	desc TEXT NOT NULL
+	description TEXT NOT NULL
 );
 
 CREATE TABLE intervention_type(
 	intervention_type_id SERIAL PRIMARY KEY,
 	name VARCHAR(50) NOT NULL,
-	desc TEXT NOT NULL
+	description TEXT NOT NULL
 );
 
 CREATE TABLE intervention(
 	intervention_id SERIAL PRIMARY KEY,
 	intervention_type_id INT NOT NULL REFERENCES intervention_type(intervention_type_id),
 	name VARCHAR(50) NOT NULL,
-	desc TEXT NOT NULL
+	description TEXT NOT NULL
 );
 
 CREATE TABLE illness_type(
 	illness_type_id SERIAL PRIMARY KEY,
 	name VARCHAR(50) NOT NULL,
-	desc TEXT NOT NULl
+	description TEXT NOT NULl
 );
 
 CREATE TABLE illness(
 	illness_id SERIAL PRIMARY KEY,
 	illness_type_id INT NOT NULL REFERENCES illness_type(illness_type_id),
+	name VARCHAR(50) NOT NULL,
 	severity severity NOT NULL,
-	desc TEXT NOT NULL
+	description TEXT NOT NULL
 );
 
 CREATE TABLE profession(
 	profession_id SERIAL PRIMARY KEY,
 	department_id INT NOT NULL REFERENCES department(department_id),
 	name VARCHAR(50) NOT NULL,
-	desc TEXT
+	description TEXT
 );
 
 CREATE TABLE hospital(
@@ -145,16 +156,6 @@ CREATE TABLE shift(
 	shift_end TIMESTAMP NOT NULL,
 	clocked_in TIMESTAMP,
 	clocked_out TIMESTAMP
-);
-
-CREATE TABLE address(
-	address_id SERIAL PRIMARY KEY,
-	city_id INT NOT NULL REFERENCES city(city_id),
-	country country NOT NULL,
-	address_line_1 VARCHAR(150) NOT NULL,
-	address_line_2 VARCHAR(150),
-	postcode VARCHAR(8) NOT NULL,
-	direction direction NOT NULL
 );
 
 CREATE TABLE patient(
@@ -262,7 +263,7 @@ CREATE TABLE feedback(
 CREATE TABLE staff_performance(
 	performance_id SERIAL PRIMARY KEY,
 	staff_id INT NOT NULL REFERENCES staff(staff_id),
-	performance_type postive_negative NOT NULL,
+	performance_type positive_negative NOT NULL,
 	performance_desc TEXT NOT NULL
 );
 
@@ -353,7 +354,7 @@ INSERT INTO
 			('Bangor');
 
 INSERT INTO
-	department(name, desc)
+	department(name, description)
 		VALUES
 			('Accident & Emergency', 'Department handling accidents and emergency illnesses'),
 			('Cardiology', 'Department focusing on heart health'),
@@ -363,7 +364,7 @@ INSERT INTO
 			('Gastroenterology', 'Department focusing on digestive health');
 
 INSERT INTO
-	intervention_type(name, desc)
+	intervention_type(name, description)
 		VALUES
 			('Surgery', 'Covers any surgical operation of the body'),
 			('Ultrasound', 'Creates internal images of body using high frequency sound waves'),
@@ -374,30 +375,30 @@ INSERT INTO
 			('Injection / Drips', 'Any type of injection (IM, SC, IV, ID)');
 
 INSERT INTO
-	intervention(invervention_id, intervention_type_id, name, desc)
+	intervention(intervention_id, intervention_type_id, name, description)
 		VALUES
-			(1, 1, 'Heart Transplant', 'Replacing a failing heart with a healthier organ'), #Heart Surgery
-			(2, 1, 'Coronary Artery Stent', 'Placing a stent in the one or more heart arteries due to blockage / plaque build up'), #Heart Surgery
-			(3, 1, 'Valve Repair', 'Repairing one or more heart valves'), #Heart Surgery
-			(4, 1, 'Lung Transplant', 'Replacing one or more lungs with a healthier organ'), #Lung Surgery
-			(5, 1, 'Lobectomy', 'Removing a lobe of the lung'), #Lung Surgery
-			(6, 1, 'Pneumonectomy', 'Removal of one lung'), #Lung Surgery
-			(7, 1, 'Craniotomy', 'Skull opening for access to the brain'), #Brain Surgery
-			(8, 1, 'Aneurysm Clipping', 'Isolating a brain aneurysm'), #Brain Surgery
-			(9, 1, 'Brain Tumor Removal', 'Removal of a tumour in the brain'), #Brain Surgery
-			(10, 2, 'Aortic Ultrasound', 'Scan of the aorta for abnormalities'), #Aorta Ultrasound
-			(11, 2, 'Penile Ultrasound', 'Scan of the penis for abnormalities'), #Penile Ultrasound
-			(12, 2, 'Neck Ultrasound', 'Scan of the neck for neck and throat abnormalities'), #Neck Ultrasound
-			(13, 3, 'Head MRI', 'Scan of the head for brain and neck abnormalities'), #Head MRI
-			(14, 4, 'Head CT', 'Scan of the head for brain and neck abnormalities'), #Head MRI
-			(15, 4, 'Chest CT', 'Scan of the chest to look for lung and heart abnormalities'), #Chest CT
-			(16, 5, 'Chest X-Ray', 'Scan of the chest to look for lung and heart abnormalities'), #Chest X-Ray
-			(17, 6, 'Blood Draw', 'Withdrawal of blood for analysis to look for abnormal values'), #Blood Draw
-			(18, 7, 'Chemotherapy Drip', 'Insertion of chemotherapy solution as a treatment for cancer'), #Chemotherapy Drip
-			(19, 7, 'Nutrient Drip', 'Insertion of nutrients to nourish patients unable to digest food and drink'); #Nutrient Drip
+			(1, 1, 'Heart Transplant', 'Replacing a failing heart with a healthier organ'), -- Heart Surgery
+			(2, 1, 'Coronary Artery Stent', 'Placing a stent in the one or more heart arteries due to blockage / plaque build up'), -- Heart Surgery
+			(3, 1, 'Valve Repair', 'Repairing one or more heart valves'), -- Heart Surgery
+			(4, 1, 'Lung Transplant', 'Replacing one or more lungs with a healthier organ'), -- Lung Surgery
+			(5, 1, 'Lobectomy', 'Removing a lobe of the lung'), -- Lung Surgery
+			(6, 1, 'Pneumonectomy', 'Removal of one lung'), -- Lung Surgery
+			(7, 1, 'Craniotomy', 'Skull opening for access to the brain'), -- Brain Surgery
+			(8, 1, 'Aneurysm Clipping', 'Isolating a brain aneurysm'), -- Brain Surgery
+			(9, 1, 'Brain Tumor Removal', 'Removal of a tumour in the brain'), -- Brain Surgery
+			(10, 2, 'Aortic Ultrasound', 'Scan of the aorta for abnormalities'), -- Aorta Ultrasound
+			(11, 2, 'Penile Ultrasound', 'Scan of the penis for abnormalities'), -- Penile Ultrasound
+			(12, 2, 'Neck Ultrasound', 'Scan of the neck for neck and throat abnormalities'), -- Neck Ultrasound
+			(13, 3, 'Head MRI', 'Scan of the head for brain and neck abnormalities'), -- Head MRI
+			(14, 4, 'Head CT', 'Scan of the head for brain and neck abnormalities'), -- Head MRI
+			(15, 4, 'Chest CT', 'Scan of the chest to look for lung and heart abnormalities'), -- Chest CT
+			(16, 5, 'Chest X-Ray', 'Scan of the chest to look for lung and heart abnormalities'), -- Chest X-Ray
+			(17, 6, 'Blood Draw', 'Withdrawal of blood for analysis to look for abnormal values'), -- Blood Draw
+			(18, 7, 'Chemotherapy Drip', 'Insertion of chemotherapy solution as a treatment for cancer'), -- Chemotherapy Drip
+			(19, 7, 'Nutrient Drip', 'Insertion of nutrients to nourish patients unable to digest food and drink'); -- Nutrient Drip
 
 INSERT INTO
-	illness_type(name, desc)
+	illness_type(name, description)
 		VALUES
 			('Cardiovascular', 'Issues involving the heart'),
 			('Neurological', 'Issues involving the brain'),
@@ -406,19 +407,19 @@ INSERT INTO
 			('Haematological', 'Issues involving the blood');
 
 INSERT INTO
-	illness(illness_id, illness_type_id, name, desc)
+	illness(illness_id, illness_type_id, name, description, severity)
 		VALUES
-			(1, 1, 'Heart Failure', 'Heart disease beyond repair'),
-			(2, 1, 'Coronary Artery Disease', 'Build up of plaque in one or more arteries of the heart'),
-			(3, 1, 'Valve Stenosis', 'Valve unable to open fully limiting bloodflow'),
-			(4, 3, 'Lung Failure', 'Lung issues that are beyond repair'),
-			(5, 3, 'Lung Cancer', 'One or more cancerous tumours on part of the lungs'),
-			(6, 3, 'Lung Fungal Infection', 'Severe infection of the lungs'),
-			(7, 2, 'Brain Aneurysm', 'Aneurysm of any location in the brain'),
-			(8, 2, 'Brain Cancer', 'One or more cancerous tumours on the brain'),
-			(9, 4, 'Irritable Bowel Syndrome (IBS)', 'Sensitive bowels that react to specific types of dietary context'),
-			(10, 4, 'Gastroesophageal Reflux Disease (GERD)', 'Condition that causes stomach contents to raise up into the lower throat'),
-			(11, 5, 'Acute Lymphoblastic Leukemia', 'Cancer of blood and bone marrow affecting lymphoblasts');
+			(1, 1, 'Heart Failure', 'Heart disease beyond repair', 'High Mortality'),
+			(2, 1, 'Coronary Artery Disease', 'Build up of plaque in one or more arteries of the heart', 'Medium Mortality'),
+			(3, 1, 'Valve Stenosis', 'Valve unable to open fully limiting bloodflow', 'Medium Mortality'),
+			(4, 3, 'Lung Failure', 'Lung issues that are beyond repair', 'High Mortality'),
+			(5, 3, 'Stage 2 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Medium Mortality'),
+			(6, 3, 'Lung Fungal Infection', 'Severe infection of the lungs', 'Low Mortality'),
+			(7, 2, 'Brain Aneurysm', 'Aneurysm of any location in the brain', 'Medium Mortality'),
+			(8, 2, 'Stage 4 Brain Cancer', 'One or more cancerous tumours on the brain', 'High Mortality'),
+			(9, 4, 'Irritable Bowel Syndrome (IBS)', 'Sensitive bowels that react to specific types of dietary context', 'Low Mortality'),
+			(10, 4, 'Gastroesophageal Reflux Disease (GERD)', 'Condition that causes stomach contents to raise up into the lower throat', 'Low Mortality'),
+			(11, 5, 'Acute Lymphoblastic Leukemia', 'Cancer of blood and bone marrow affecting lymphoblasts', 'Medium Mortality');
 
 INSERT INTO
 	address(city_id, country, address_line_1, address_line_2, postcode, direction)
@@ -987,7 +988,7 @@ INSERT INTO
 		(58, '3651777392', 'Tracey', NULL, 'Turner', '08811386338', 'tracey.turner@email.com', 'Male', '2013-02-04'),
 		(59, '9367632016', 'Karen', NULL, 'Williams', '08288619576', 'karen.williams@email.com', 'Male', '1995-02-02'),
 		(60, '4324451076', 'Alison', 'Eric', 'O''Neill', '08286852897', 'alison.o''neill@email.com', 'Female', '1933-05-12'),
-		(61, '5171339596', 'Declan', NULL, 'Brown', '08855665939', 'declan.brown@email.com', 'Male', '2000-01-14'),
+		(61, '5171339596', 'Tom', NULL, 'Brown', '08855665939', 'tom.brown@email.com', 'Male', '2000-01-14'),
 		(62, '2513412528', 'Bernard', NULL, 'Fox', '08845776004', 'bernard.fox@email.com', 'Male', '1925-08-17'),
 		(63, '2595269495', 'Steven', NULL, 'Walters', '08404335048', 'steven.walters@email.com', 'Male', '1932-08-29'),
 		(64, '6914630316', 'Bernard', 'Ryan', 'Townsend', '08752245933', 'bernard.townsend@email.com', 'Female', '1969-08-14'),
@@ -1224,7 +1225,7 @@ INSERT INTO
 		(295, '1146786691', 'Linda', NULL, 'Johnson', '08452321941', 'linda.johnson@email.com', 'Female', '1992-06-29'),
 		(296, '8547772522', 'Kayleigh', NULL, 'Williams', '08061027769', 'kayleigh.williams@email.com', 'Female', '1931-09-03'),
 		(297, '1972181143', 'Dennis', NULL, 'Phillips', '08956412203', 'dennis.phillips@email.com', 'Male', '1942-06-24'),
-		(298, '4821759464', 'Gerard', NULL, 'Williams', '08303723683', 'gerard.williams@email.com', 'Male', '2019-09-06'),
+		(298, '4821759464', 'Tom', NULL, 'Williams', '08303723683', 'tom.williams@email.com', 'Male', '2019-09-06'),
 		(299, '7586926179', 'Danielle', NULL, 'O''Neill', '08727601227', 'danielle.o''neill@email.com', 'Female', '2010-05-24'),
 		(300, '4103865719', 'Tina', NULL, 'Roberts', '08793349605', 'tina.roberts@email.com', 'Male', '2021-04-01'),
 		(301, '2895171870', 'Sam', 'Stephen', 'Kemp', '08667998407', 'sam.kemp@email.com', 'Female', '1999-10-23'),
@@ -1292,7 +1293,7 @@ INSERT INTO
 		(363, '1177589178', 'Marc', NULL, 'Daniels', '08078593110', 'marc.daniels@email.com', 'Male', '1998-01-23'),
 		(364, '9212779979', 'Claire', NULL, 'Hill', '08392845679', 'claire.hill@email.com', 'Female', '1961-09-27'),
 		(365, '0568566246', 'Roger', 'Hayley', 'Smith', '08200249685', 'roger.smith@email.com', 'Female', '1964-10-25'),
-		(366, '9413186999', 'Declan', NULL, 'Roberts', '08822749545', 'declan.roberts@email.com', 'Male', '1988-05-21'),
+		(366, '9413186999', 'Tom', NULL, 'Roberts', '08822749545', 'tom.roberts@email.com', 'Male', '1988-05-21'),
 		(367, '0651333872', 'Keith', NULL, 'Dale', '08203880653', 'keith.dale@email.com', 'Male', '1955-05-10'),
 		(368, '0084840862', 'Sian', NULL, 'Wood', '08315377959', 'sian.wood@email.com', 'Female', '1978-09-26'),
 		(369, '5289539264', 'Nicole', NULL, 'Owen', '08652170730', 'nicole.owen@email.com', 'Male', '1978-05-08'),
