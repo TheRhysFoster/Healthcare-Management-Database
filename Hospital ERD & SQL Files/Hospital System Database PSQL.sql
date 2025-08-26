@@ -364,9 +364,11 @@ INSERT INTO
 			('Accident & Emergency', 'Department handling accidents and emergency illnesses'),
 			('Cardiology', 'Department focusing on heart health'),
 			('Oncology', 'Department focusing on cancer treatment'),
+			('Respiratory', 'Department focusing on lung health'),
 			('Neurology', 'Department focusing on brain health'),
 			('Radiology', 'Department focusing on CT, MRI, Ultrasound & X-Ray for diagnostic purposes'),
-			('Gastroenterology', 'Department focusing on digestive health');
+			('Gastroenterology', 'Department focusing on digestive health'),
+			('Pharmacology', 'Department focusing on supplying patients with correct medication');
 
 INSERT INTO
 	intervention_type(name, description)
@@ -2289,5 +2291,31 @@ INSERT INTO
 			(919, 'STAFF-NI-81999', 'Noah', 'Grace', 'Scott', '08957485362', 'noahscott398@email.com', 'noahscott398@fakenhs.uk', '1960-10-15'),
 			(920, 'STAFF-NI-37146', 'Harper', 'Lee', 'Edwards', '08920086400', 'harperedwards@email.com', 'harperedwards@fakenhs.uk', '1989-11-10');
 
+INSERT INTO
+	profession(department_id, name, description)
+		VALUES
+			(1, 'Emergency Medicine Consultant', 'Senior doctor managing emergency cases'),
+			(1, 'Emergency Nurse Practitioner', 'Nurse providing urgent and emergency care'),
+			(2, 'Cardiologist', 'Doctor specialising in heart conditions'),
+			(2, 'Heart Surgeon', 'Surgeon performing cardiac operations'),
+			(2, 'Cardiac Nurse', 'Nurse caring for heart patients'),
+			(3, 'Oncologist', 'Doctor treating cancer patients'),
+			(3, 'Oncology Nurse', 'Nurse supporting cancer care'),
+			(4, 'Respiratory Physician', 'Doctor specialising in lung conditions'),
+			(4, 'Lung Surgeon', 'Surgeon performing lung operations'),
+			(4, 'Respiratory Nurse', 'Nurse caring for respiratory patients'),
+			(5, 'Neurologist', 'Doctor treating brain and nerve disorders'),
+			(5, 'Neuro Science Nurse', 'Nurse supporting neurology patients'),
+			(5, 'Brain Surgeon', 'Neurosurgeon performing brain operations'),
+			(6, 'Radiographer', 'Professional performing imaging scans'),
+			(6, 'Sonographer', 'Specialist in ultrasound imaging'),
+			(6, 'Radiologist', 'Doctor interpreting medical images'),
+			(6, 'Interventional Radiology Nurse', 'Nurse assisting in radiology procedures'),
+			(7, 'Gastroenterologist', 'Doctor treating digestive system diseases'),
+			(7, 'Gastroenterology Nurse', 'Nurse supporting GI patients'),
+			(7, 'Upper GI Surgeon', 'Surgeon for upper digestive tract'),
+			(7, 'Colorectal Surgeon', 'Surgeon for colon and rectum'),
+			(7, 'Hepatobiliary Surgeon', 'Surgeon for liver, pancreas and bile ducts'),
+			(8, 'Pharmacist', 'Professional dispensing and advising on medicines');
 
 -- ******************************** DATA INSERTION ENDS HERE ******************************** --
