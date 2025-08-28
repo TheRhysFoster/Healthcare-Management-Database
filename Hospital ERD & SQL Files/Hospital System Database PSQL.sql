@@ -10,7 +10,7 @@ CREATE TYPE direction
 	AS ENUM('South East', 'North East', 'South West', 'North West');
 
 CREATE TYPE patient_status
-	AS ENUM('Under Treatment', 'End of Life Care', 'Deceased', 'Discharged');
+	AS ENUM('Undergoing Tests','Under Treatment', 'End of Life Care', 'Deceased', 'Discharged');
 
 CREATE TYPE severity
 	AS ENUM('Low Mortality', 'Medium Mortality', 'High Mortality');
@@ -225,6 +225,7 @@ CREATE TABLE hospitalized(
 CREATE TABLE hospitalization_cause(
 	hospitalization_id INT NOT NULL REFERENCES hospitalized(hospitalization_id),
 	illness_id INT NOT NULL REFERENCES illness(illness_id),
+	symptoms TEXT NOT NULL,
 	staff_id INT NOT NULL REFERENCES staff(staff_id),
 	PRIMARY KEY(hospitalization_id, illness_id)
 );
@@ -271,6 +272,18 @@ CREATE TABLE staff_performance(
 	performance_type positive_negative NOT NULL,
 	performance_desc TEXT NOT NULL
 );
+
+CREATE TABLE stock_type(
+	stock_type_id SERIAL PRIMARY KEY,
+	name VARCHAR(50) NOT NULL,
+	description TEXT NOT NULL
+);
+
+CREATE TABLE stock(
+	stock_id SERIAL PRIMARY KEY,
+	name VARCHAR(100) NOT NULL,
+	description TEXT NOT NULL
+)
 
 -- ******************************** TABLE CREATION ENDS HERE ******************************** --
 
@@ -411,7 +424,8 @@ INSERT INTO
 			('Neurological', 'Issues involving the brain'),
 			('Respiratory', 'Issues involving lungs and airways'),
 			('Gastrointestinal', 'Issues involving the stomach and intestines'),
-			('Haematological', 'Issues involving the blood');
+			('Haematological', 'Issues involving the blood'),
+			('None', 'N/A');
 
 INSERT INTO
 	illness(illness_id, illness_type_id, name, description, severity)
@@ -426,7 +440,8 @@ INSERT INTO
 			(8, 2, 'Stage 4 Brain Cancer', 'One or more cancerous tumours on the brain', 'High Mortality'),
 			(9, 4, 'Irritable Bowel Syndrome (IBS)', 'Sensitive bowels that react to specific types of dietary context', 'Low Mortality'),
 			(10, 4, 'Gastroesophageal Reflux Disease (GERD)', 'Condition that causes stomach contents to raise up into the lower throat', 'Low Mortality'),
-			(11, 5, 'Acute Lymphoblastic Leukemia', 'Cancer of blood and bone marrow affecting lymphoblasts', 'Medium Mortality');
+			(11, 5, 'Acute Lymphoblastic Leukemia', 'Cancer of blood and bone marrow affecting lymphoblasts', 'Medium Mortality'),
+			(12, 6, 'Symptoms Only', 'Symptoms present but no illness identified at this time')
 
 INSERT INTO
 	address(city_id, country, address_line_1, address_line_2, postcode, direction, address_type)
