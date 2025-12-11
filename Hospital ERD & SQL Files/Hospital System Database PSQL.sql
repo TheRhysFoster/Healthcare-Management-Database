@@ -1,4 +1,9 @@
--- ******************************** ENUM CREATION STARTS HERE ******************************** --
+CREATE DATABASE hospital_system;
+
+\c hospital_system
+
+
+-- ENUM CREATION STARTS HERE
 
 CREATE TYPE time_type
 	AS ENUM('Full-Time', 'Part-Time', 'On-Call');
@@ -13,7 +18,7 @@ CREATE TYPE patient_status
 	AS ENUM('Undergoing Tests','Under Treatment', 'End of Life Care', 'Deceased', 'Discharged');
 
 CREATE TYPE severity
-	AS ENUM('Low Mortality', 'Medium Mortality', 'High Mortality');
+	AS ENUM('N/A', 'Low Mortality', 'Medium Mortality', 'High Mortality');
 
 CREATE TYPE illness_status
 	AS ENUM('Improved', 'Worsened', 'Cured');
@@ -448,14 +453,20 @@ INSERT INTO
 			(2, 1, 'Coronary Artery Disease', 'Build up of plaque in one or more arteries of the heart', 'Medium Mortality'),
 			(3, 1, 'Valve Stenosis', 'Valve unable to open fully limiting bloodflow', 'Medium Mortality'),
 			(4, 3, 'Lung Failure', 'Lung issues that are beyond repair', 'High Mortality'),
-			(5, 3, 'Stage 2 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Medium Mortality'),
-			(6, 3, 'Lung Fungal Infection', 'Severe infection of the lungs', 'Low Mortality'),
-			(7, 2, 'Brain Aneurysm', 'Aneurysm of any location in the brain', 'Medium Mortality'),
-			(8, 2, 'Stage 4 Brain Cancer', 'One or more cancerous tumours on the brain', 'High Mortality'),
-			(9, 4, 'Irritable Bowel Syndrome (IBS)', 'Sensitive bowels that react to specific types of dietary context', 'Low Mortality'),
-			(10, 4, 'Gastroesophageal Reflux Disease (GERD)', 'Condition that causes stomach contents to raise up into the lower throat', 'Low Mortality'),
-			(11, 5, 'Acute Lymphoblastic Leukemia', 'Cancer of blood and bone marrow affecting lymphoblasts', 'Medium Mortality'),
-			(12, 6, 'Symptoms Only', 'Symptoms present but no illness identified at this time');
+			(5, 3, 'Stage 1 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Low Mortality'),
+			(6, 3, 'Stage 2 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Medium Mortality'),
+			(7, 3, 'Stage 3 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Medium Mortality'),
+			(8, 3, 'Stage 4 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'High Mortality'),
+			(9, 3, 'Lung Fungal Infection', 'Severe infection of the lungs', 'Low Mortality'),
+			(10, 2, 'Brain Aneurysm', 'Aneurysm of any location in the brain', 'Medium Mortality'),
+			(11, 2, 'Grade 1 Brain Cancer', 'One or more cancerous tumours on the brain', 'Low Mortality'),
+			(12, 2, 'Grade 2 Brain Cancer', 'One or more cancerous tumours on the brain', 'Medium Mortality'),
+			(13, 2, 'Grade 3 Brain Cancer', 'One or more cancerous tumours on the brain', 'High Mortality'),
+			(14, 2, 'Grade 4 Brain Cancer', 'One or more cancerous tumours on the brain', 'High Mortality'),
+			(15, 4, 'Irritable Bowel Syndrome (IBS)', 'Sensitive bowels that react to specific types of dietary context', 'Low Mortality'),
+			(16, 4, 'Gastroesophageal Reflux Disease (GERD)', 'Condition that causes stomach contents to raise up into the lower throat', 'Low Mortality'),
+			(17, 5, 'Acute Lymphoblastic Leukemia', 'Cancer of blood and bone marrow affecting lymphoblasts', 'Medium Mortality'),
+			(18, 6, 'Symptoms Only', 'Symptoms present but no illness identified at this time', 'N/A');
 
 INSERT INTO
 	address(city_id, country, address_line_1, address_line_2, postcode, direction, address_type)
