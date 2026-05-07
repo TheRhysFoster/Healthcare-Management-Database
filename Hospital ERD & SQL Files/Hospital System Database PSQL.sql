@@ -215,7 +215,7 @@ CREATE TABLE patient_illness(
 	staff_id INT NOT NULL REFERENCES staff(staff_id),
 	illness_status illness_status NOT NULL,
 	symptoms TEXT,
-	notes TEXT
+	findings TEXT
 );
 
 CREATE TABLE hospitalized(
@@ -318,7 +318,7 @@ CREATE OR REPLACE FUNCTION add_patient_illness()
 		THEN
 
 			INSERT INTO 
-				patient_illness(patient_id, illness_id, staff_id, illness_status, symptoms, notes)
+				patient_illness(patient_id, illness_id, staff_id, illness_status, symptoms, findings)
 			SELECT 
 				a.patient_id, new.illness_id, new.staff_id, 'Stable', a.notes, new.notes
 			FROM
