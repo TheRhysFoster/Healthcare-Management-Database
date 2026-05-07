@@ -21,7 +21,7 @@ CREATE TYPE severity
 	AS ENUM('N/A', 'Low Mortality', 'Medium Mortality', 'High Mortality');
 
 CREATE TYPE illness_status
-	AS ENUM('Improved', 'Worsened', 'Cured');
+	AS ENUM('Stable', 'Improved', 'Worsened', 'Cured');
 
 CREATE TYPE smoking_usage
 	AS ENUM('Trying to quit', 'Used to smoke', 'None');
@@ -55,7 +55,6 @@ CREATE TYPE address_type
 
 
 -- ******************************** ENUM CREATION ENDS HERE ******************************** --
-
 
 
 -- ******************************** TABLE CREATION STARTS HERE ******************************** --
@@ -215,6 +214,7 @@ CREATE TABLE patient_illness(
 	illness_id INT NOT NULL REFERENCES illness(illness_id),
 	staff_id INT NOT NULL REFERENCES staff(staff_id),
 	illness_status illness_status NOT NULL,
+	symptoms TEXT,
 	notes TEXT
 );
 
@@ -306,7 +306,45 @@ CREATE TABLE appointment_stock(
 
 -- ******************************** TABLE CREATION ENDS HERE ******************************** --
 
+CREATE OR REPLACE FUNCTION add_patient_illness()
 
+	RETURNS TRIGGER AS
+	$$
+
+	BEGIN
+
+		IF 
+			new.illness_id != 19
+		THEN
+
+			INSERT INTO 
+				patient_illness(patient_id, illness_id, staff_id, illness_status, symptoms, notes)
+			SELECT 
+				a.patient_id, new.illness_id, new.staff_id, 'Stable', a.notes, new.notes
+			FROM
+				appointment_result ar
+			JOIN
+				appointment a
+			ON
+				new.appointment_id = a.appointment_id
+			LIMIT 1;
+
+		END IF;
+
+		RETURN NEW;
+	END;
+$$
+LANGUAGE PLPGSQL;
+
+CREATE TRIGGER trig_add_patient_illness
+
+	AFTER INSERT ON
+
+		appointment_result
+
+	FOR EACH ROW
+
+EXECUTE PROCEDURE add_patient_illness();
 
 -- ******************************** DATA INSERTION STARTS HERE ******************************** --
 

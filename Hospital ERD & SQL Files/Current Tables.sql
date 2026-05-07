@@ -1,0 +1,17 @@
+city
+department
+intervention_type
+intervention
+illness_type
+illness
+address
+patient
+hospital
+staff
+profession
+staff_profession
+patient_lifestyle
+patient_indicator
+appointment
+staff_appointment
+appointent_results
