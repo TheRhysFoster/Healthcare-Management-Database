@@ -15,3 +15,6 @@ patient_indicator
 appointment
 staff_appointment
 appointent_results
+patient_illness (from trigger)
+patient_recreational_usage
+recreation
