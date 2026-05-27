@@ -236,7 +236,6 @@ CREATE TABLE hospitalized(
 CREATE TABLE hospitalization_cause(
 	hospitalization_id INT NOT NULL REFERENCES hospitalized(hospitalization_id),
 	illness_id INT NOT NULL REFERENCES illness(illness_id),
-	symptoms TEXT NOT NULL,
 	staff_id INT NOT NULL REFERENCES staff(staff_id),
 	PRIMARY KEY(hospitalization_id, illness_id)
 );
