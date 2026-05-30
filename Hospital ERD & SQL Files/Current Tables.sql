@@ -18,3 +18,5 @@ appointent_results
 patient_illness (from trigger)
 patient_recreational_usage
 recreation
+hospital_department
+illness_types

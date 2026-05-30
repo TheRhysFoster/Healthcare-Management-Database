@@ -96,10 +96,15 @@ CREATE TABLE illness_type(
 
 CREATE TABLE illness(
 	illness_id SERIAL PRIMARY KEY,
-	illness_type_id INT NOT NULL REFERENCES illness_type(illness_type_id),
 	name VARCHAR(50) NOT NULL,
 	severity severity NOT NULL,
 	description TEXT NOT NULL
+);
+
+CREATE TABLE illness_types(
+	illness_id INT NOT NULL REFERENCES illness(illness_id),
+	illness_type_id INT NOT NULL REFERENCES illness_type(illness_type_id),
+	PRIMARY KEY(illness_id, illness_type_id)
 );
 
 CREATE TABLE profession(
@@ -511,30 +516,62 @@ INSERT INTO
 			('Gastrointestinal', 'Issues involving the stomach and intestines'),
 			('Haematological', 'Issues involving the blood'),
 			('None', 'N/A'),
-			('Urological', 'Issues involving the genitalia');
+			('Urological', 'Issues involving the genitalia'),
+			('Cancer', 'Non-benign tumour growths in parts of the body');
 
 INSERT INTO
-	illness(illness_id, illness_type_id, name, description, severity)
+	illness(illness_id, name, description, severity)
 		VALUES
-			(1, 1, 'Heart Failure', 'Heart disease beyond repair', 'High Mortality'),
-			(2, 1, 'Coronary Artery Disease', 'Build up of plaque in one or more arteries of the heart', 'Medium Mortality'),
-			(3, 1, 'Valve Stenosis', 'Valve unable to open fully limiting bloodflow', 'Medium Mortality'),
-			(4, 3, 'Lung Failure', 'Lung issues that are beyond repair', 'High Mortality'),
-			(5, 3, 'Stage 1 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Low Mortality'),
-			(6, 3, 'Stage 2 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Medium Mortality'),
-			(7, 3, 'Stage 3 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Medium Mortality'),
-			(8, 3, 'Stage 4 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'High Mortality'),
-			(9, 3, 'Lung Fungal Infection', 'Severe infection of the lungs', 'Low Mortality'),
-			(10, 2, 'Brain Aneurysm', 'Aneurysm of any location in the brain', 'Medium Mortality'),
-			(11, 2, 'Grade 1 Brain Cancer', 'One or more cancerous tumours on the brain', 'Low Mortality'),
-			(12, 2, 'Grade 2 Brain Cancer', 'One or more cancerous tumours on the brain', 'Medium Mortality'),
-			(13, 2, 'Grade 3 Brain Cancer', 'One or more cancerous tumours on the brain', 'High Mortality'),
-			(14, 2, 'Grade 4 Brain Cancer', 'One or more cancerous tumours on the brain', 'High Mortality'),
-			(15, 4, 'Irritable Bowel Syndrome (IBS)', 'Sensitive bowels that react to specific types of dietary context', 'Low Mortality'),
-			(16, 4, 'Gastroesophageal Reflux Disease (GERD)', 'Condition that causes stomach contents to raise up into the lower throat', 'Low Mortality'),
-			(17, 5, 'Acute Lymphoblastic Leukemia', 'Cancer of blood and bone marrow affecting lymphoblasts', 'Medium Mortality'),
-			(18, 7, 'Penile Fibrosis', 'Fibrosis / Scarring appearing on any internal structure of the penis', 'N/A'),
-			(19, 6, 'Symptoms Only', 'Symptoms present but no illness identified at this time', 'N/A');
+			(1, 'Heart Failure', 'Heart disease beyond repair', 'High Mortality'),
+			(2, 'Coronary Artery Disease', 'Build up of plaque in one or more arteries of the heart', 'Medium Mortality'),
+			(3, 'Valve Stenosis', 'Valve unable to open fully limiting bloodflow', 'Medium Mortality'),
+			(4, 'Lung Failure', 'Lung issues that are beyond repair', 'High Mortality'),
+			(5, 'Stage 1 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Low Mortality'),
+			(6, 'Stage 2 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Medium Mortality'),
+			(7, 'Stage 3 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'Medium Mortality'),
+			(8, 'Stage 4 Lung Cancer', 'One or more cancerous tumours on part of the lungs', 'High Mortality'),
+			(9, 'Lung Fungal Infection', 'Severe infection of the lungs', 'Low Mortality'),
+			(10, 'Brain Aneurysm', 'Aneurysm of any location in the brain', 'Medium Mortality'),
+			(11, 'Grade 1 Brain Cancer', 'One or more cancerous tumours on the brain', 'Low Mortality'),
+			(12, 'Grade 2 Brain Cancer', 'One or more cancerous tumours on the brain', 'Medium Mortality'),
+			(13, 'Grade 3 Brain Cancer', 'One or more cancerous tumours on the brain', 'High Mortality'),
+			(14, 'Grade 4 Brain Cancer', 'One or more cancerous tumours on the brain', 'High Mortality'),
+			(15, 'Irritable Bowel Syndrome (IBS)', 'Sensitive bowels that react to specific types of dietary context', 'Low Mortality'),
+			(16, 'Gastroesophageal Reflux Disease (GERD)', 'Condition that causes stomach contents to raise up into the lower throat', 'Low Mortality'),
+			(17, 'Acute Lymphoblastic Leukemia', 'Cancer of blood and bone marrow affecting lymphoblasts', 'Medium Mortality'),
+			(18, 'Penile Fibrosis', 'Fibrosis / Scarring appearing on any internal structure of the penis', 'N/A'),
+			(19, 'Symptoms Only', 'Symptoms present but no illness identified at this time', 'N/A');
+
+INSERT INTO
+	illness_types(illness_id, illness_type_id)
+		VALUES
+			(1, 1),
+			(2, 1),
+			(3, 1),
+			(4, 3),
+			(5, 3),
+			(6, 3),
+			(7, 3),
+			(8, 3),
+			(5, 8),
+			(6, 8),
+			(7, 8),
+			(8, 8),
+			(9, 3),
+			(10, 2),
+			(11, 2),
+			(12, 2),
+			(13, 2),
+			(14, 2),
+			(11, 8),
+			(12, 8),
+			(13, 8),
+			(14, 8),
+			(15, 4),
+			(16, 4),
+			(17, 5),
+			(18, 7),
+			(19, 6);
 
 INSERT INTO
 	address(city_id, country, address_line_1, address_line_2, postcode, direction, address_type)
