@@ -336,7 +336,8 @@ CREATE TABLE appointment_stock(
 	PRIMARY KEY(appointment_id, stock_id)
 );
 
--- ******************************** TABLE CREATION ENDS HERE ******************************** --
+
+-- **************************** TRIG / FUNC CREATION STARTS HERE **************************** --
 
 CREATE OR REPLACE FUNCTION add_patient_illness()
 
@@ -419,6 +420,54 @@ CREATE TRIGGER trig_update_hospital_stock
 
 EXECUTE PROCEDURE update_hospital_stock();
 
+
+-- **************************** VIEW / QUERY CREATION STARTS HERE **************************** --
+
+CREATE VIEW
+	patient_heart_disease_indicators AS
+		SELECT
+			EXTRACT(YEAR FROM age(current_date, date_of_birth)) AS "Patient Age",
+			pi.hdl AS "HDL Count",
+			pi.ldl AS "LDL Count",
+			pi.triglycerides AS "Triglycerides Count",
+			pi.total_cholesterol AS "Total Cholesterol",
+			pi.systolic AS "Systolic Pressure",
+			pi.diastolic AS "Diastolic Pressure",
+			pi.blood_sugar AS "Blood Sugar Level"
+		FROM
+			patient p
+		JOIN
+			patient_indicator pi
+		ON
+			p.patient_id = pi.patient_id
+		JOIN
+			patient_illness pil
+		ON
+			pi.patient_id = pil.patient_id
+		WHERE
+			pil.illness_id = 2;
+
+CREATE VIEW
+	patient_heart_disease_symptoms AS
+		SELECT
+			s.name AS "Coronary Heart Disease Symptoms",
+			CONCAT(ROUND((COUNT(aps.symptom_id)::numeric / (SELECT COUNT(apr.appointment_id) FROM appointment_result apr WHERE apr.illness_id = 2) * 100), 2), '%') AS "Occurence Percentage"
+		FROM
+			symptom s
+		JOIN
+			appointment_symptom aps
+		ON
+			s.symptom_id = aps.symptom_id
+		JOIN
+			appointment_result apr
+		ON
+			aps.appointment_id = apr.appointment_id
+		WHERE
+			apr.illness_id = 2
+		GROUP BY 
+			s.symptom_id
+		ORDER BY
+			"Occurence Percentage" DESC;
 
 
 -- ******************************** DATA INSERTION STARTS HERE ******************************** --
