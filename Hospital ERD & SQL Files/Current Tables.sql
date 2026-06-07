@@ -20,3 +20,16 @@ patient_recreational_usage
 recreation
 hospital_department
 illness_types
+appointment_symptom
+appointment_result_finding
+finding
+symptom
+stock_type
+hospital_stock
+stock
+appointment_stock
+HOSPITALIZED - NEEDED
+HOSPITALIZATION_CAUSE - NEEDED
+SHIFT - NEEDED
+FEEDBACK - NEEDED
+STAFF_PERFORMANCE - NEEDED
