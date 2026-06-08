@@ -185,13 +185,6 @@ CREATE TABLE patient(
 	date_of_birth DATE NOT NULL
 );
 
-CREATE TABLE patient_recreational_usage(
-	patient_id INT NOT NULL REFERENCES patient(patient_id),
-	recreation_id INT NOT NULL REFERENCES recreation(recreation_id),
-	recreation_amount alcohol_usage NOT NULL,
-	PRIMARY KEY(patient_id, recreation_id)
-);
-
 CREATE TABLE patient_lifestyle(
 	patient_lifestyle_id SERIAL PRIMARY KEY,
 	patient_id INT NOT NULL REFERENCES patient(patient_id),
@@ -202,7 +195,15 @@ CREATE TABLE patient_lifestyle(
 	recreational_usage recreational_usage NOT NULL,
 	exercise_amount exercise_amount NOT NULL,
 	dietary_type dietary_type NOT NULL,
-	notes TEXT
+	notes TEXT,
+	date_confirmed DATE NOT NULL
+);
+
+CREATE TABLE patient_recreational_usage(
+	patient_lifestyle_id INT NOT NULL REFERENCES patient_lifestyle(patient_lifestyle_id),
+	recreation_id INT NOT NULL REFERENCES recreation(recreation_id),
+	recreation_amount alcohol_usage NOT NULL,
+	PRIMARY KEY(patient_lifestyle_id, recreation_id)
 );
 
 CREATE TABLE patient_indicator(
@@ -230,10 +231,17 @@ CREATE TABLE patient_illness(
 	diagnosis_date DATE NOT NULL
 );
 
+CREATE TABLE ward(
+	ward_id SERIAL PRIMARY KEY,
+	hospital_id INT NOT NULL REFERENCES hospital(hospital_id),
+	department_id INT NOT NULL REFERENCES department(department_id),
+	name VARCHAR(5) NOT NULL
+);
+
 CREATE TABLE hospitalized(
 	hospitalization_id SERIAL PRIMARY KEY,
 	patient_id INT NOT NULL REFERENCES patient(patient_id),
-	hospital_id INT NOT NULL REFERENCES hospital(hospital_id),
+	ward_id INT NOT NULL REFERENCES ward(ward_id),
 	patient_status patient_status NOT NULL,
 	checked_in TIMESTAMP NOT NULL,
 	checked_out TIMESTAMP
@@ -336,6 +344,13 @@ CREATE TABLE appointment_stock(
 	stock_id INT NOT NULL REFERENCES stock(stock_id),
 	amount_used SMALLINT NOT NULL,
 	PRIMARY KEY(appointment_id, stock_id)
+);
+
+CREATE TABLE prescription(
+	prescription_id SERIAL PRIMARY KEY,
+	stock_id INT NOT NULL REFERENCES stock(stock_id),
+	patient_id INT NOT NULL REFERENCES patient(patient_id),
+	staff_id INT NOT NULL REFERENCES staff(staff_id)
 );
 
 
