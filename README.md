@@ -2,4 +2,4 @@
 
 ## 🗺️ ERD
 
-![Entity Relationship Diagram](./Docs/Hospital ERD.png)
+![Entity Relationship Diagram](./Docs/Hospital%20ERD.png)
