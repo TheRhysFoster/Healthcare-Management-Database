@@ -482,13 +482,13 @@ CREATE OR REPLACE FUNCTION update_hospital_stock()
 			FROM
 				prescription p
 			JOIN
-				staff s
+				patient pa
 			ON
-				p.staff_id = s.staff_id
+				p.patient_id = pa.patient_id
 			JOIN
-				staff_profession sp
+				appointment a
 			ON
-				s.staff_id = sp.staff_id
+				pa.patient_id = a.patient_id
 			WHERE
 				new.stock_id = hs.stock_id
 			AND
@@ -680,8 +680,6 @@ CREATE VIEW
 			s.symptom_id
 		ORDER BY
 			"Occurence Percentage" DESC;
-
-CREATE patient_lung_cancer_potential_causes
 
 
 -- ******************************** DATA INSERTION STARTS HERE ******************************** --
@@ -2565,7 +2563,7 @@ INSERT INTO
 			(726, 'STAFF-SC-13275', 'Logan', 'Jane', 'Turner', '08428406368', 'loganturner205@email.com', 'loganturner205@fakenhs.uk', 'Male', '1965-09-15'),
 			(727, 'STAFF-SC-84862', 'Hannah', NULL, 'Green', '08514929672', 'hannahgreen@email.com', 'hannahgreen@fakenhs.uk', 'Male', '1989-08-25'),
 			(728, 'STAFF-SC-23254', 'Jacob', NULL, 'Edwards', '08326927455', 'jacobedwards207@email.com', 'jacobedwards207@fakenhs.uk', 'Male', '1991-07-15'),
-			(729, 'STAFF-SC-51807', 'Jack', NULL, 'Wilson', '08574701819', 'jackwilson208@email.com', 'jackwilson208@fakenhs.uk', 'Male', '1 'Female',967-05-04'),
+			(729, 'STAFF-SC-51807', 'Jack', NULL, 'Wilson', '08574701819', 'jackwilson208@email.com', 'jackwilson208@fakenhs.uk', 'Male', '1967-05-04'),
 			(730, 'STAFF-SC-28092', 'Matthew', 'Mae', 'Roberts', '08824160228', 'matthewroberts@email.com', 'matthewroberts@fakenhs.uk', 'Female', '1997-09-07'),
 			(731, 'STAFF-SC-48406', 'Jack', 'Lee', 'Wilson', '08397658522', 'jackwilson210@email.com', 'jackwilson210@fakenhs.uk', 'Female', '1978-11-18'),
 			(732, 'STAFF-SC-19523', 'Jacob', NULL, 'King', '08953858242', 'jacobking@email.com', 'jacobking@fakenhs.uk', 'Female', '1968-06-25'),
@@ -2776,7 +2774,7 @@ INSERT INTO
 			(937, 'STAFF-NI-84574', 'Ella', 'May', 'Baker', '08800123472', 'ellabaker5684@email.com', 'ellabaker84@fakenhs.uk', 'Female', '1992-08-19'),
 			(938, 'STAFF-NI-65235', 'Harry', 'George', 'Adams', '08800123473', 'harryadams84@email74.com', 'harryadams84@fakenhs.uk', 'Female', '1987-11-27'),
 			(939, 'STAFF-NI-42734', 'Isabella', 'Ruby', 'Nelson', '08800123474', 'isabellanelson3284@email.com', 'isabellanelson84@fakenhs.uk', 'Female', '1990-06-02'),
-			(940, 'STAFF-NI-54242', 'Oscar', 'Arthur', 'Mitchell', '08800123475', 'oscarmitchell4384@email.com', 'oscarmitchell84@fakenhs.uk', '1985-09-09');
+			(940, 'STAFF-NI-54242', 'Oscar', 'Arthur', 'Mitchell', '08800123475', 'oscarmitchell4384@email.com', 'oscarmitchell84@fakenhs.uk', 'Female', '1985-09-09');
 
 INSERT INTO
 	profession(department_id, name, description)
