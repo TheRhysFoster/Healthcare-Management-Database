@@ -66,7 +66,7 @@ Using a primary key instead of a composite key made up of `patient_id` & `illnes
 
 **2\) What is the `findings` TEXT attribute in the `patient_illness` entity?**
 
-The data stored in this attribute is automatically pushed through from `notes` found in the `appointment_result` table. This is based on the assumption that when a GP or even a member of staff at a hospital wants to check over a patient's medical history, they want to read in detail what issues were found leading to the diagnosis. Given that `notes` is a TEXT attribute, this allows the staff members who found issues during appointments to write in detail what the findings were. 
+The data stored in this attribute is automatically pushed through from `notes` found in the `appointment_result` table. This is based on the assumption that when a GP or even a member of staff at a hospital wants to check over a patient's medical history, they want to read in detail what issues were found leading to the diagnosis. Given that `notes` is a TEXT attribute, this allows the staff members who found issues during appointments to write in detail about what was found. 
 
 As mentioned in the previous section, if an research style analysis of specific illnesses is needed, that is when `notes` is avoided and instead a query will access `appointment_symptom` and `appointment_result_finding` for a cleaner, more structured view. This view could then be accessed with external tools like PowerBI.
 
