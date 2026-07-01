@@ -1,4 +1,4 @@
-# 🏥 Hospital Database & Analysis
+# 🏥 Hospital Database
 A PostgreSQL database that handles core hospital operations and medical data by utilizing triggers and functions for necessary automation and indexes for real-world query performance.
 
 **Includes but not limited to:**
@@ -29,10 +29,8 @@ ${\color{#1071E5}\text{PK/FK = Composite Key}}$
 </div>
 
 
-## 🗄️ Database Architecture & Design
-
-### Table Justification
-#### 📋 Appointment Lifecycle
+## 📊 Table Justification
+### 📋 Appointment Lifecycle
 **1\) Why isn't there a `staff_id` foreign key in the `appointment` entity?**
 
 It may be the case that more than one staff member needs to attend an appointment. This won't happen for all appointments and in fact could be considered a rare occurence depending on the type. However given it's a possibility, it needs to be accounted for in the schema. A simple junction table `staff_appointment` allows different staff members (`staff_id`) to be assigned to the same appointment (`appointment_id`). 
@@ -59,16 +57,16 @@ The same logic applies to the `appointment_symptom` entity. The majority of the 
 The `notes` attribute of `appointment` and `appointment_result` are written about but in any amount of detail a staff member deems necessary. However if that was the only record of what was found during appointments and the patient's original symptoms, it wouldn't be as straight forward to link what's stored in `notes` to specific illnesses. This would most likely require a function in the frontend to parse the TEXT in `notes` and tackle common human errors like spelling mistakes. 
 
 
-#### 👤 Patient Lifecycle
+### 👤 Patient Lifecycle
 **1\) Why isn't `patient_illness` a junction table?**
 
 Using a primary key instead of a composite key made up of `patient_id` & `illness_id` allows for a patient to have multiple entries of the same illness. At first glance this can seem like it increases the chance of redundancy through duplicate data, however in a medical environment it is necessary to design the schema this way. 
 
 *If we look at a real-world example of someone who has been cleared of cancer, unfortunately in many cases it can return. If this happens, a new appointment will be booked and the outcome could be the same diagnosis as before, but with potentially different symptoms / findings and the illness being confirmed by another staff member. To have an accurate patient history, all repeating illnesses need to be logged.*
 
-**2\) What are the `symptoms` & `findings` TEXT attributes in the `patient_illness` entity?**
+**2\) What is the `findings` TEXT attribute in the `patient_illness` entity?**
 
-The data stored in those attributes are automatically pushed through from `notes` found in the `appointment` and `appointment_result` tables. This is based on the assumption that when a GP or even a member of staff at a hospital wants to check over a patient's medical history, they want to read in detail what symptoms the patient presented with and what issues were found. Given that `notes` is a TEXT attribute, this allows them to do so. The alternative would be a list without a certified staff member's additions.
+The data stored in this attribute is automatically pushed through from `notes` found in the `appointment_result` table. This is based on the assumption that when a GP or even a member of staff at a hospital wants to check over a patient's medical history, they want to read in detail what issues were found leading to the diagnosis. Given that `notes` is a TEXT attribute, this allows the staff members who found issues during appointments to write in detail what the findings were. 
 
 As mentioned in the previous section, if an research style analysis of specific illnesses is needed, that is when `notes` is avoided and instead a query will access `appointment_symptom` and `appointment_result_finding` for a cleaner, more structured view. This view could then be accessed with external tools like PowerBI.
 
@@ -81,44 +79,210 @@ For example, if a patient has high blood pressure / HDL / blood sugar, these rea
 If all of those attributes were to be overwritten everytime they were updated, there wouldn't be any way for medical staff to track a patient's history regarding those details.
 
 
-### 🔗 Junction Tables
+## 🔗 Junction Tables
 In this section, I will cover the remaining junctions tables that have not yet been mentioned, and briefly explain their purpose.
 
-#### JT1) Patient Recreational Usage
+### JT1) Patient Recreational Usage
 Some patients may be using multiple types of recreational drugs. A junction table is needed to track the correct amounts of each type. 
 
 **The three reasons for part of the composite key using `patient_lifestyle_id` instead of `patient_id` are:**
 
-Recreational usage is a lifestyle choice and being linked to `patient_lifestyle` keeps all relevant information intact held together by `date_confirmed` and the `patient_lifestyle_id`.
+*Recreational usage is a lifestyle choice and being linked to `patient_lifestyle` keeps all relevant information intact held together by `date_confirmed` and the `patient_lifestyle_id`.*
 
-Using `patient_id` would cause the primary key constraint to fail
+*Using `patient_id` would cause the primary key constraint to fail*
 
-`recreation_id` would only hold one value if placed in the `patient_lifestyle` entity
+*`recreation_id` would only hold one value if placed in the `patient_lifestyle` entity*
   
 **If a patient has three entries into `patient_recreational_usage` but the composite key was instead made up of `patient_id` and `recreational_id`, then:**
 
-✅ The first states they are using type 1 (`patient_id` = 1, `recreation_id` = 1)
+*✅ The first states they are using type 1 (`patient_id` = 1, `recreation_id` = 1)*
 
-✅ The second states they aren't using any (no `patient_recreationl_usage` entry)
+*✅ The second states they aren't using any (no `patient_recreationl_usage` entry)*
 
-❌ The third states they are using type 1 again (`patient_id` = 1, `recreation_id` = 1)
+*❌ The third states they are using type 1 again (`patient_id` = 1, `recreation_id` = 1)*
 
 The third step is what will fail the constraint.
 
-#### JT2) Illness Types
+### JT2) Illness Types
 To begin with, the `illness_type_id` was included in the `illness` table, but some illnesses do fall under two categories which is why the junction was needed. For example, lung cancer would be classified as 'Respiratory' and 'Cancer'.
 
-#### JT3) Hospitalization Cause
+### JT3) Hospitalization Cause
 This table is a junction between `hospitalized` and `symptom`. Records will mainly be inserted in here and `hospitalized` depending on the outcome of A&E visits. Given that a person may present with many symptoms, if they are hospitalized because of them, each one needs to be linked to the `hospitalization_id`. 
 
-#### JT4) Appointment Stock
+### JT4) Appointment Stock
 A simple table that tracks exactly which stock and how much was used during each appointment.
 
-#### JT5) Hospital Stock 
+### JT5) Hospital Stock 
 This table tracks the total amount of each item a hospital currently has in inventory. It is updated automatically depending on the `prescription` and `appointment_stock` tables. This will be broken down into more detail in a later section.
 
-#### JT6) Hopsital Department
+### JT6) Hopsital Department
 Most hospitals will not have the exact same amounts or types of departments. This table not only tracks this, but also specific department phone extensions numbers and emails per hospital.
 
-#### JT7) Staff Profession
+### JT7) Staff Profession
 In rare cases, a member of staff can have more than 1 role / profession and in even rarer cases, the professions can take place at different hospitals. This table uses a composite primary key made up of the `staff_id`, `profession_id` and `hospital_id` to solve this. Also stored here are the main attributes of professions. These attributes cannot be stored in a table like `staff` as they directly relate to role and may differ between those roles.
+
+
+## ⚡ Triggers & Functions
+
+### 📦 Stock Tracking
+<details>
+  <summary>🔍 Click To View Function: (Update Hospital Stock)</summary>
+
+```sql
+CREATE OR REPLACE FUNCTION update_hospital_stock()
+
+	RETURNS TRIGGER AS
+	$$
+
+	BEGIN
+
+		IF TG_TABLE_NAME = 'appointment_stock' THEN
+
+			UPDATE
+				hospital_stock hs
+			SET
+				total_amount = hs.total_amount - new.amount_used
+			FROM
+				appointment_stock ast
+			JOIN
+				appointment a
+			ON
+				new.appointment_id = a.appointment_id
+			JOIN
+				hospital h
+			ON
+				a.hospital_id = h.hospital_id
+			WHERE
+				new.stock_id = hs.stock_id
+			AND
+				hs.hospital_id = h.hospital_id;
+
+		ELSEIF TG_TABLE_NAME = 'prescription' THEN
+
+			UPDATE
+				hospital_stock hs
+			SET
+				total_amount = hs.total_amount - new.amount_used
+			FROM
+				prescription p
+			JOIN
+				hospital h
+			ON
+				p.hospital_id = h.hospital_id
+			WHERE
+				new.stock_id = hs.stock_id
+			AND
+				hs.hospital_id = h.hospital_id;
+
+		END IF;
+		
+		RETURN NEW;
+	END;
+$$
+LANGUAGE PLPGSQL;
+```
+</details>
+
+Each hospital will have different amounts and types of stock and this is currently stored in the `hospital_stock` entity. In a large scale hospital system, it would be unrealistic to expect manual updates of inventory per hospital. To tackle this, I implemented a function that automatically alters the values in `hospital_stock` which rely on insertions into `appointment_stock` and `prescription` through triggers.
+
+The JOINs are different depending on whether a prescription was filled out OR items were used during an appointment, so to determine what logic to use a conditional IF statement is present in the function which checks which table caused the function to execute.
+
+When an insertion is made in `appointment_stock` or `prescription`, the function needs to match the `hospital_id` where the prescription or appointment took place to that same ID in `hospital_stock`
+
+For `prescription`, the `hospital_id` is already recorded, leading to a shorter join. However with `appointment_stock`, it first needs to join to the `appointment` table which is where `hospital_id` is stored.
+
+*Staff member on front-end interface records that 4 sterile gauze swabs were used during a surgery. The surgery was the 18th appointment of Greenfield Hospital*
+
+```text
+[appointment_stock]: (appointment_id = 18, stock_id = 12, amount_used = 4)
+   └───> JOIN to appointment table using appointment_id
+[appointment]:       (appointment_id = 18, hospital_id = 1)
+   └───> JOIN to hospital_stock table using hospital_id and stock_id
+[hospital_stock]:    (hospital_id = 1, stock_id = 12, total_amount - 4)
+```
+
+### 📈 Staff Performance
+<details>
+  <summary>🔍 Click To View Function: (Update Staff Performance)</summary>
+
+```sql
+CREATE OR REPLACE FUNCTION update_staff_performance()
+
+	RETURNS TRIGGER AS
+	$$
+
+	BEGIN
+
+		IF TG_TABLE_NAME = 'shift' THEN
+
+			IF
+				(new.clocked_in > new.shift_start)
+			THEN
+				INSERT INTO
+					staff_performance
+						(staff_id, shift_id, performance_type, performance_desc) VALUES
+							(new.staff_id, new.shift_id, 'Negative', CONCAT('Late to work by', ' ', EXTRACT(HOUR FROM(new.clocked_in - new.shift_start)), ' ', 'hours and', ' ', EXTRACT(MINUTE FROM(new.clocked_in - new.shift_start)), ' ', 'minutes'));
+
+			ELSEIF
+				(new.clocked_in < new.shift_start)
+			THEN
+				INSERT INTO
+					staff_performance
+						(staff_id, shift_id, performance_type, performance_desc) VALUES
+							(new.staff_id, new.shift_id, 'Positive', CONCAT('Early to work by', ' ', EXTRACT(HOUR FROM(new.shift_start - new.clocked_in)), ' ', 'hours and', ' ', EXTRACT(MINUTE FROM(new.shift_start - new.clocked_in)), ' ', 'minutes'));
+
+			END IF;				
+			
+			IF
+				(new.clocked_out > new.shift_end)
+			THEN
+				INSERT INTO
+					staff_performance
+						(staff_id, shift_id, performance_type, performance_desc) VALUES
+							(new.staff_id, new.shift_id, 'Positive', CONCAT('Stayed an extra', ' ', EXTRACT(HOUR FROM(new.clocked_out - new.shift_end)), ' ', 'hours and', ' ', EXTRACT(MINUTE FROM(new.clocked_out - new.shift_end)), ' ', 'minutes', ' ', 'after shift ended'));
+			END IF;
+			
+
+		ELSEIF TG_TABLE_NAME = 'feedback' THEN
+
+			IF 
+				(new.verified = TRUE)
+			THEN
+				IF
+					(new.feedback_type = 'Positive')
+				THEN
+					INSERT INTO
+						staff_performance
+							(staff_id, feedback_id, performance_type, performance_desc) VALUES
+								(new.staff_id, new.feedback_id, 'Positive', 'Patient left positive feedback about staff member');
+
+				ELSEIF
+					(new.feedback_type = 'Negative')
+				THEN
+					INSERT INTO
+							staff_performance
+								(staff_id, feedback_id, performance_type, performance_desc) VALUES
+									(new.staff_id, new.feedback_id, 'Negative', 'Patient left negative feedback about staff member');
+				END IF;
+			END IF;
+		END IF;
+		
+		RETURN NEW;
+	END;
+$$
+LANGUAGE PLPGSQL;
+```
+</details>
+
+This function causes specific types of information to be inserted into the `staff_performance` entity depending on which table it is triggered by. The two tables that are able to trigger it are `shift` and `feedback`.
+
+Similar to the previous function, a conditional IF statement is used to determine which table caused the trigger. From here, more IF statements are used against some data from the table causing the trigger so that either "Positive" or "Negative" records are inserted correctly.
+
+In terms of the `shift` table, attributes such as `shift_start`, `shift_end`, `clocked_in` and `clocked_out` are used to calculate whether a staff member was late, early or stayed for extra time after their shift. The specific amount of time a staff member was late, early or overstayed by is also calculated for the record.
+
+The `feedback` table stores any positive or negative reviews by patients about staff members. Before inserting all reviews into `staff_performance`, the BOOLEAN attribute `verified` needs to be TRUE. This means that hypothetically another member of staff has reviewed the case, and using the front-end system sets the review of the patient to verified.
+
+This type of performance data will be useful to managers who need to monitor employees work ethic, behaviour and any progression being made OR larger queries to monitor the overall standard of entire hospitals.
+
+### 👤 Patient Illness Function
+
