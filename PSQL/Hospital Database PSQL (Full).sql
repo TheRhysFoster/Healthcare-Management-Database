@@ -54,6 +54,9 @@ CREATE TYPE address_type
 CREATE TYPE feedback_status
 	AS ENUM('Open', 'Closed');
 
+CREATE TYPE condition
+	AS ENUM('Stable', 'Improving', 'Worsening', 'Cured');
+
 	
 -- ******************************** TABLE CREATION STARTS HERE ******************************** --
 
@@ -229,10 +232,8 @@ CREATE TABLE patient_illness(
 	patient_illness_id SERIAL PRIMARY KEY,
 	patient_id INT NOT NULL REFERENCES patient(patient_id),
 	illness_id INT NOT NULL REFERENCES illness(illness_id),
-	staff_id INT NOT NULL REFERENCES staff(staff_id),
-	symptoms TEXT,
-	findings TEXT,
-	diagnosis_date DATE NOT NULL
+	condition condition NOT NULL,
+	findings TEXT
 );
 
 CREATE TABLE ward(
@@ -320,6 +321,8 @@ CREATE TABLE feedback(
 CREATE TABLE staff_performance(
 	performance_id SERIAL PRIMARY KEY,
 	staff_id INT NOT NULL REFERENCES staff(staff_id),
+	feedback_id INT REFERENCES feedback(feedback_id),
+	shift_id INT REFERENCES shift(shift_id),
 	performance_type positive_negative NOT NULL,
 	performance_desc TEXT NOT NULL
 );
@@ -425,19 +428,27 @@ CREATE OR REPLACE FUNCTION add_patient_illness()
 		IF 
 			new.illness_id != 19
 		THEN
+			UPDATE
+				patient_illness
+			SET
+				findings = CONCAT(findings, ', ', new.notes)
+			WHERE
+				illness_id = new.illness_id
+			AND
+				condition != 'Cured'
+			AND
+				patient_id = (SELECT a.patient_id FROM appointment a WHERE a.appointment_id = new.appointment_id);
 
-			INSERT INTO 
-				patient_illness(patient_id, illness_id, staff_id, symptoms, findings, diagnosis_date)
-			SELECT 
-				a.patient_id, new.illness_id, new.staff_id, a.notes, new.notes, new.confirmed_date
-			FROM
-				appointment_result ar
-			JOIN
-				appointment a
-			ON
-				new.appointment_id = a.appointment_id
-			LIMIT 1;
-
+			IF NOT FOUND THEN
+				INSERT INTO 
+					patient_illness(patient_id, illness_id, condition, findings)
+				SELECT
+					a.patient_id, new.illness_id, 'Stable', new.notes
+				FROM
+					appointment a
+				WHERE 
+					a.appointment_id = new.appointment_id;
+			END IF;
 		END IF;
 
 		RETURN NEW;
@@ -513,26 +524,28 @@ CREATE OR REPLACE FUNCTION update_staff_performance()
 			THEN
 				INSERT INTO
 					staff_performance
-						(staff_id, performance_type, performance_desc) VALUES
-							(new.staff_id, 'Negative', CONCAT('Late to work by', ' ', EXTRACT(HOUR FROM(new.clocked_in - new.shift_start)), ' ', 'hours and', ' ', EXTRACT(MINUTE FROM(new.clocked_in - new.shift_start)), ' ', 'minutes'));
+						(staff_id, shift_id, performance_type, performance_desc) VALUES
+							(new.staff_id, new.shift_id, 'Negative', CONCAT('Late to work by', ' ', EXTRACT(HOUR FROM(new.clocked_in - new.shift_start)), ' ', 'hours and', ' ', EXTRACT(MINUTE FROM(new.clocked_in - new.shift_start)), ' ', 'minutes'));
 
 			ELSEIF
 				(new.clocked_in < new.shift_start)
 			THEN
 				INSERT INTO
 					staff_performance
-						(staff_id, performance_type, performance_desc) VALUES
-							(new.staff_id, 'Positive', CONCAT('Early to work by', ' ', EXTRACT(HOUR FROM(new.shift_start - new.clocked_in)), ' ', 'hours and', ' ', EXTRACT(MINUTE FROM(new.shift_start - new.clocked_in)), ' ', 'minutes'));
+						(staff_id, shift_id, performance_type, performance_desc) VALUES
+							(new.staff_id, new.shift_id, 'Positive', CONCAT('Early to work by', ' ', EXTRACT(HOUR FROM(new.shift_start - new.clocked_in)), ' ', 'hours and', ' ', EXTRACT(MINUTE FROM(new.shift_start - new.clocked_in)), ' ', 'minutes'));
 
-			ELSEIF
+			END IF;				
+			
+			IF
 				(new.clocked_out > new.shift_end)
 			THEN
 				INSERT INTO
 					staff_performance
-						(staff_id, performance_type, performance_desc) VALUES
-							(new.staff_id, 'Positive', CONCAT('Stayed an extra', ' ', EXTRACT(HOUR FROM(new.clocked_out - new.shift_end)), ' ', 'hours and', ' ', EXTRACT(MINUTE FROM(new.clocked_out - new.shift_end)), ' ', 'minutes', ' ', 'after shift ended'));
-
+						(staff_id, shift_id, performance_type, performance_desc) VALUES
+							(new.staff_id, new.shift_id, 'Positive', CONCAT('Stayed an extra', ' ', EXTRACT(HOUR FROM(new.clocked_out - new.shift_end)), ' ', 'hours and', ' ', EXTRACT(MINUTE FROM(new.clocked_out - new.shift_end)), ' ', 'minutes', ' ', 'after shift ended'));
 			END IF;
+			
 
 		ELSEIF TG_TABLE_NAME = 'feedback' THEN
 
@@ -544,16 +557,16 @@ CREATE OR REPLACE FUNCTION update_staff_performance()
 				THEN
 					INSERT INTO
 						staff_performance
-							(staff_id, performance_type, performance_desc) VALUES
-								(new.staff_id, 'Positive', 'Patient left positive feedback about staff member');
+							(staff_id, feedback_id, performance_type, performance_desc) VALUES
+								(new.staff_id, new.feedback_id, 'Positive', 'Patient left positive feedback about staff member');
 
 				ELSEIF
 					(new.feedback_type = 'Negative')
 				THEN
 					INSERT INTO
 							staff_performance
-								(staff_id, performance_type, performance_desc) VALUES
-									(new.staff_id, 'Negative', 'Patient left negative feedback about staff member');
+								(staff_id, feedback_id, performance_type, performance_desc) VALUES
+									(new.staff_id, new.feedback_id, 'Negative', 'Patient left negative feedback about staff member');
 				END IF;
 			END IF;
 		END IF;
