@@ -62,7 +62,7 @@ The `notes` attribute of `appointment` and `appointment_result` are written abou
 
 Using a primary key instead of a composite key made up of `patient_id` & `illness_id` allows for a patient to have multiple entries of the same illness. At first glance this can seem like it increases the chance of redundancy through duplicate data, however in a medical environment it is necessary to design the schema this way. 
 
-*If we look at a real-world example of someone who has been cleared of cancer, unfortunately in many cases it can return. If this happens, a new appointment will be booked and the outcome could be the same diagnosis as before, but with potentially different symptoms / findings and the illness being confirmed by another staff member. To have an accurate patient history, all repeating illnesses need to be logged.*
+*If we look at a real-world example of someone who has been cleared of cancer, unfortunately in many cases it can return. If this happens, a new appointment will be booked and the outcome could be the same diagnosis as before, but with potentially different medical findings and the illness being confirmed by another staff member. To have an accurate patient history, all repeating illnesses need to be logged.*
 
 **2\) What is the `findings` TEXT attribute in the `patient_illness` entity?**
 
@@ -276,7 +276,7 @@ LANGUAGE PLPGSQL;
 
 This function causes specific types of information to be inserted into the `staff_performance` entity depending on which table it is triggered by. The two tables that are able to trigger it are `shift` and `feedback`.
 
-Similar to the previous function, a conditional IF statement is used to determine which table caused the trigger. From here, more IF statements are used against some data from the table causing the trigger so that either "Positive" or "Negative" records are inserted correctly.
+Similar to the previous function, a conditional IF statement is used to determine which table caused the trigger. From here, more IF statements are used on the table data so that either "Positive" or "Negative" records are inserted relating to staff punctuality or patient feedback.
 
 In terms of the `shift` table, attributes such as `shift_start`, `shift_end`, `clocked_in` and `clocked_out` are used to calculate whether a staff member was late, early or stayed for extra time after their shift. The specific amount of time a staff member was late, early or overstayed by is also calculated for the record.
 
@@ -285,4 +285,90 @@ The `feedback` table stores any positive or negative reviews by patients about s
 This type of performance data will be useful to managers who need to monitor employees work ethic, behaviour and any progression being made OR larger queries to monitor the overall standard of entire hospitals.
 
 ### 👤 Patient Illness Function
+<details>
+  <summary>🔍 Click To View Function: (Add / Update Patient Illness)</summary>
 
+```sql
+CREATE OR REPLACE FUNCTION add_patient_illness()
+
+	RETURNS TRIGGER AS
+	$$
+
+	BEGIN
+
+		IF 
+			new.illness_id != 19
+		THEN
+			UPDATE
+				patient_illness
+			SET
+				findings = CONCAT(findings, ', ', new.notes)
+			WHERE
+				illness_id = new.illness_id
+			AND
+				condition != 'Cured'
+			AND
+				patient_id = (SELECT a.patient_id FROM appointment a WHERE a.appointment_id = new.appointment_id);
+
+			IF NOT FOUND THEN
+				INSERT INTO 
+					patient_illness(patient_id, illness_id, condition, findings)
+				SELECT
+					a.patient_id, new.illness_id, 'Stable', new.notes
+				FROM
+					appointment a
+				WHERE 
+					a.appointment_id = new.appointment_id;
+			END IF;
+		END IF;
+
+		RETURN NEW;
+	END;
+$$
+LANGUAGE PLPGSQL;
+```
+</details>
+
+When records are inserted into `appointment_result`, the `add_patient_illness()` function is triggered to populate the `patient_illness` entity. After a diagnosis has been made, it is important to have a table that tracks the illnesses of each patient and it's current condition. As mentioned earlier, this table does not use a composite primary key so records including the same patient and illness can be inserted more than once under certain circumstances.
+
+The function above makes sure that the only time a record including the same patient and illness can be created, is when `condition` attribute of the previous record is set to `Cured`. 
+
+```text
+Patient Illness ID: 39
+Patient ID: 1
+Illness ID: 7
+Condition: 'Cured'
+Findings: '4cm Tumour on right lobe, Right lobe tumour successfully removed`
+```
+
+If a patient was diagnosed with Stage 3 Lung Cancer and later went into remission, the `condition` would be set to `Cured`. It is only after this if they are unfortunately diagnosed with the same illness again, a new record will be added as it would be the start of a new illness cycle.
+
+**What happens if the existing record `condition` value isn't `Cured`, but a new `appointment_result` entry has the same `illness_id` recorded in `patient_illness`?**
+
+Instead of creating a new record for the same illness, the current record and it's `findings` attribute are concantenated with new medical data gathered during the appointment.
+
+*Imagine the original appointment revealed that the patient has a 5cm tumour on their left lobe.*
+
+```text
+Patient Illness ID: 40
+Patient ID: 1
+Illness ID: 7
+Condition: 'Stable'
+Findings: '5cm Tumour on left lobe`
+```
+
+*3 months later the patient has another appointment and a scan reveals the tumour has shrunk to 3cm.* 
+
+It would be redundant to create a new `patient_illness` record as this would include already existing `patient_id`, `illness_id` and a new `condition` attribute for the same ongoing illness that's not yet been cured.
+
+Instead, we keep the same record but update `findings` and allow a member of staff to update the condition of the illness:
+```text
+Patient Illness ID: 40
+Patient ID: 1
+Illness ID: 7
+Condition: 'Improving'
+Findings: '5cm Tumour on left lobe, Tumour shrunk to 3cm in 3 months`
+```
+
+
+## 🗂️ Indexing
