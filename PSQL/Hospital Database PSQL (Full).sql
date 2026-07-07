@@ -40,7 +40,7 @@ CREATE TYPE country
 	AS ENUM('England', 'Wales', 'Northern Ireland', 'Scotland');
 
 CREATE TYPE appointment_status
-	AS ENUM('Cancelled', 'Did not attend', 'Attended', 'Rescheduled');
+	AS ENUM('Cancelled', 'Did not attend', 'Attended', 'Rescheduled', 'Scheduled');
 
 CREATE TYPE positive_negative
 	AS ENUM('Positive', 'Negative');
@@ -691,6 +691,64 @@ CREATE VIEW
 		ORDER BY
 			"Occurence Percentage" DESC;
 
+WITH 
+	staff_appointments 
+AS
+	(
+		SELECT
+			sp1.appointment_id
+		FROM
+			staff_appointment sp1
+		JOIN
+			appointment a1
+		ON
+			sp1.appointment_id = a1.appointment_id
+		WHERE
+			sp1.staff_id = 1
+		AND
+			a1.appointment_status = 'Scheduled'
+	)
+
+SELECT
+	CONCAT(p.first_name, ' ', p.last_name) AS "Patient",
+	d.name AS "Department",
+	a.appointment_date AS "Date & Time",
+	i.name AS "Medical Intervention",
+	STRING_AGG(s.first_name || ' ' || s.last_name, ', ') AS "Assigned Staff"
+FROM
+	appointment a
+JOIN
+	staff_appointments sps
+ON
+	a.appointment_id = sps.appointment_id
+JOIN
+	staff_appointment sp
+ON
+	a.appointment_id = sp.appointment_id
+JOIN
+	staff s
+ON
+	sp.staff_id = s.staff_id
+JOIN
+	patient p 
+ON
+	a.patient_id = p.patient_id
+JOIN
+	department d
+ON
+	a.department_id = d.department_id
+JOIN
+	intervention i 
+ON
+	a.intervention_id = i.intervention_id
+GROUP BY 
+	"Patient",
+	"Department",
+	"Date & Time",
+	"Medical Intervention"
+ORDER BY
+	"Date & Time"
+ASC;
 
 -- ******************************** DATA INSERTION STARTS HERE ******************************** --
 
@@ -4460,13 +4518,13 @@ INSERT INTO
 INSERT INTO 
 	appointment 
 		(patient_id, department_id, hospital_id, intervention_id, notes, appointment_date, appointment_status) VALUES
-			(1, 2, 1, 20, 'Patient has had chest pain and pressure along with vertigo', '2024-03-15', 'Attended'),
+			(1, 2, 1, 20, 'Patient has had chest pain and pressure along with vertigo', '2024-03-15', 'Scheduled'),
 			(2, 6, 1, 16, 'Patient has been coughing for months', '2024-02-28', 'Attended'),
 			(3, 6, 1, 14, 'Patient lost consciousness', '2024-03-10', 'Attended'),
 			(4, 6, 1, 16, 'Patient is persistently coughing blood for long periods of time', '2024-01-22', 'Attended'),
 			(5, 9, 1, 17, 'Patient feels they have lost energy and strength that has not returned', '2024-03-18', 'Attended'),
 			(6, 1, 1, 19, 'Patient has not been able to eat for days due to a stomach virus', '2024-02-14', 'Attended'),
-			(7, 2, 1, 20, 'Patient is struggling to breathe whilst doing daily tasks that were once doable', '2024-03-05', 'Attended'),
+			(7, 2, 1, 20, 'Patient is struggling to breathe whilst doing daily tasks that were once doable', '2024-03-05', 'Scheduled'),
 			(8, 6, 1, 12, 'Patient cannot turn their head', '2024-01-30', 'Attended'),
 			(9, 6, 1, 13, 'Patient has been experiencing severe headaches for weeks', '2024-02-19', 'Attended'),
 			(10, 6, 1, 15, 'Patient has been coughing for months', '2024-03-12', 'Attended'),
@@ -4476,15 +4534,15 @@ INSERT INTO
 			(14, 6, 1, 16, 'Patient is persistently coughing blood for long periods of time', '2024-03-20', 'Attended'),
 			(15, 6, 1, 13, 'Patient has been experiencing severe headaches for weeks', '2024-02-10', 'Attended'),
 			(16, 6, 1, 15, 'Patient has been coughing for months', '2024-03-14', 'Attended'),
-			(17, 2, 1, 20, 'Patient is struggling to breathe whilst doing daily tasks that were once doable', '2024-01-28', 'Attended'),
+			(17, 2, 1, 20, 'Patient is struggling to breathe whilst doing daily tasks that were once doable', '2024-01-28', 'Scheduled'),
 			(18, 6, 1, 11, 'Patient has a firm palpable nodule along the shaft', '2024-03-22', 'Attended'),
-			(19, 2, 1, 20, 'Patient has had chest pain and pressure along with vertigo', '2024-02-08', 'Attended'),
+			(19, 2, 1, 20, 'Patient has had chest pain and pressure along with vertigo', '2024-02-08', 'Scheduled'),
 			(20, 6, 1, 14, 'Patient lost consciousness', '2024-03-16', 'Attended'),
-			(21, 2, 1, 10, 'Patient experiences intense pulsations around the naval area of the abdomen', '2024-01-15', 'Attended'),
+			(21, 2, 1, 10, 'Patient experiences intense pulsations around the naval area of the abdomen', '2024-01-15', 'Scheduled'),
 			(22, 6, 1, 16, 'Patient is persistently coughing blood for long periods of time', '2024-03-03', 'Attended'),
 			(23, 9, 1, 17, 'Patient feels they have lost energy and strength that has not returned', '2024-02-22', 'Attended'),
 			(24, 6, 1, 13, 'Patient has been experiencing severe headaches for weeks', '2024-03-17', 'Attended'),
-			(25, 2, 1, 20, 'Patient is struggling to breathe whilst doing daily tasks that were once doable', '2024-02-05', 'Attended'),
+			(25, 2, 1, 20, 'Patient is struggling to breathe whilst doing daily tasks that were once doable', '2024-02-05', 'Scheduled'),
 			(26, 6, 2, 12, 'Patient reported severe neck pain', '2024-03-19', 'Attended'),
 			(27, 6, 2, 16, 'Patient has been coughing for months', '2024-02-12', 'Attended'),
 			(28, 6, 2, 14, 'Patient lost consciousness', '2024-03-22', 'Attended'),
@@ -5463,7 +5521,13 @@ INSERT INTO
 			(393, 497),
 			(392, 498),
 			(392, 499),
-			(383, 500);
+			(383, 500),
+			(2, 1),
+			(2, 7),
+			(2, 19),
+			(2, 25),
+			(2, 17),
+			(2, 21);
 
 INSERT INTO
 	symptom
