@@ -6,6 +6,9 @@ CREATE INDEX ON feedback(verified);
 CREATE INDEX ON shift(staff_id);
 CREATE INDEX ON shift(hospital_id);
 
+CREATE INDEX ON staff_appointment(staff_id);
+CREATE INDEX ON staff_appointment(appointment_id);
+
 CREATE INDEX ON prescription(stock_id);
 CREATE INDEX ON prescription(patient_id);
 CREATE INDEX ON prescription(staff_id);

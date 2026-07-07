@@ -1,9 +1,3 @@
-CREATE DATABASE hospital_database;
-
-SELECT pg_sleep(1);
-
-\c hospital_database
-
 CREATE TABLE city(
 	city_id SERIAL PRIMARY KEY,
 	name VARCHAR(50) NOT NULL
@@ -176,10 +170,8 @@ CREATE TABLE patient_illness(
 	patient_illness_id SERIAL PRIMARY KEY,
 	patient_id INT NOT NULL REFERENCES patient(patient_id),
 	illness_id INT NOT NULL REFERENCES illness(illness_id),
-	staff_id INT NOT NULL REFERENCES staff(staff_id),
-	symptoms TEXT,
-	findings TEXT,
-	diagnosis_date DATE NOT NULL
+	condition condition NOT NULL,
+	findings TEXT
 );
 
 CREATE TABLE ward(
@@ -267,6 +259,8 @@ CREATE TABLE feedback(
 CREATE TABLE staff_performance(
 	performance_id SERIAL PRIMARY KEY,
 	staff_id INT NOT NULL REFERENCES staff(staff_id),
+	feedback_id INT REFERENCES feedback(feedback_id),
+	shift_id INT REFERENCES shift(shift_id),
 	performance_type positive_negative NOT NULL,
 	performance_desc TEXT NOT NULL
 );
@@ -302,5 +296,6 @@ CREATE TABLE prescription(
 	stock_id INT NOT NULL REFERENCES stock(stock_id),
 	patient_id INT NOT NULL REFERENCES patient(patient_id),
 	staff_id INT NOT NULL REFERENCES staff(staff_id),
+	hospital_id INT NOT NULL REFERENCES hospital(hospital_id),
 	amount_used SMALLINT NOT NULL
 );

@@ -29,7 +29,7 @@ CREATE TYPE country
 	AS ENUM('England', 'Wales', 'Northern Ireland', 'Scotland');
 
 CREATE TYPE appointment_status
-	AS ENUM('Cancelled', 'Did not attend', 'Attended', 'Rescheduled');
+	AS ENUM('Cancelled', 'Did not attend', 'Attended', 'Rescheduled', 'Scheduled');
 
 CREATE TYPE positive_negative
 	AS ENUM('Positive', 'Negative');
@@ -42,3 +42,6 @@ CREATE TYPE address_type
 
 CREATE TYPE feedback_status
 	AS ENUM('Open', 'Closed');
+
+CREATE TYPE condition
+	AS ENUM('Stable', 'Improving', 'Worsening', 'Cured');

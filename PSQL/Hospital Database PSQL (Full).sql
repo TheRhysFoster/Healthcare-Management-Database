@@ -373,6 +373,9 @@ CREATE INDEX ON feedback(verified);
 CREATE INDEX ON shift(staff_id);
 CREATE INDEX ON shift(hospital_id);
 
+CREATE INDEX ON staff_appointment(staff_id);
+CREATE INDEX ON staff_appointment(appointment_id);
+
 CREATE INDEX ON prescription(stock_id);
 CREATE INDEX ON prescription(patient_id);
 CREATE INDEX ON prescription(staff_id);
@@ -431,7 +434,7 @@ CREATE OR REPLACE FUNCTION add_patient_illness()
 			UPDATE
 				patient_illness
 			SET
-				findings = CONCAT(findings, ', ', new.notes)
+				findings = CONCAT(findings, ' -> ', new.notes)
 			WHERE
 				illness_id = new.illness_id
 			AND
