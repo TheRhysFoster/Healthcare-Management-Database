@@ -62,7 +62,7 @@ The `notes` attribute of `appointment` and `appointment_result` are written abou
 
 Using a primary key instead of a composite key made up of `patient_id` & `illness_id` allows for a patient to have multiple entries of the same illness. At first glance this can seem like it increases the chance of redundancy through duplicate data, however in a medical environment it is necessary to design the schema this way. 
 
-*If we look at a real-world example of someone who has been cleared of cancer, unfortunately in many cases it can return. If this happens, a new appointment will be booked and the outcome could be the same diagnosis as before, but with potentially different medical findings and the illness being confirmed by another staff member. To have an accurate patient history, all repeating illnesses need to be logged.*
+*If we look at a real-world example of someone who has been cleared of cancer, unfortunately in many cases it can return. If this happens, a new appointment will be booked and the outcome could be the same diagnosis as before, but with potentially different medical findings and different staff member making the diagnosis. To have an accurate patient history, all repeating illnesses need to be logged.*
 
 **2\) What is the `findings` TEXT attribute in the `patient_illness` entity?**
 
@@ -302,7 +302,7 @@ CREATE OR REPLACE FUNCTION add_patient_illness()
 			UPDATE
 				patient_illness
 			SET
-				findings = CONCAT(findings, ', ', new.notes)
+				findings = CONCAT(findings, ' -> ', new.notes)
 			WHERE
 				illness_id = new.illness_id
 			AND
@@ -367,8 +367,44 @@ Patient Illness ID: 40
 Patient ID: 1
 Illness ID: 7
 Condition: 'Improving'
-Findings: '5cm Tumour on left lobe, Tumour shrunk to 3cm in 3 months`
+Findings: '5cm Tumour on left lobe -> Tumour shrunk to 3cm in 3 months`
 ```
 
 
 ## 🗂️ Indexing
+The amount of records in the database sits at around 12300+ which is miniscule compared to the live medical industry. At this point in time, the United Kingdom has a population of around 70 million and the NHS just over 2 million employees. These two primary variables (patients and staff) in conjunction with entities (such as appointments, patient data and stock) that have high frequency transactions will amount to hundreds of millions of records per year once the database is live.
+
+Given the small amount of records that currently exist, sequential scans are planning and executing faster than indexed scans. This is to be expected with such a small dataset. In a real world scenario including millions of records per table, the opposite would take place and the need for indexes would be more evident. 
+
+Imagine hundreds of staff members have clocked in for their shifts at the hospital and throughout the day check what appointments they need to attend. The staff will be logged into the hospitals website / software and access the appointments section. Each time this section is refreshed or loaded, a query written in the front end is sent to the backend to be executed on the database. The main piece of data included in the query will be the staff's ID. The staff ID (staff_id) makes up **PART** of the `WHERE` clauses in the query. Given that these appointments are for the day, all completed, cancelled or rescheduled appointments should not be displayed.
+
+```sql
+WHERE
+	staff_appointment.staff_id = $1
+AND
+	appointment.appointment_status = 'Scheduled'
+AND
+	appointment.appointment_date >= $2
+AND
+	appointment.appointment_date < $3 
+```
+
+*$ = Placeholder, 1 = First Argument (Staff ID), 2 = Second Argument (Current Date), 3 = Third Argument (Tomorrows Date)*
+*Date comparison has to be used because `appointment_date` is a TIMESTAMP and using ::date to only retrieve that date and remove the time would slow down the query*
+
+A sequential scan of `staff_appointment` and `appointment` to find the matching `appointment_status`, `appointment_date` and `staff_id` would read every single row of both tables. 
+
+```sql
+CREATE INDEX appointment_status_and_date_idx ON appointment(appointment_status, appointment_date);
+CREATE INDEX ON staff_appointment(staff_id);
+```
+The above indexes allow the database to first view a "Map" which shows which page or chunk the matching rows are in and then head directly there ignoring all irrelevant rows. This usually takes execution time down from seconds to milliseconds for extremely large datasets.
+
+Currently, only attributes that are in `JOINs` when querying OR in `WHERE` clauses have been indexed manually. PSQL automatically indexes any created attribute using a `UNIQUE` constraint. Since the database is not live and in use, the `CONCURRENTLY` option was not used as there was not a risk of blocking WRITEs.
+
+
+
+
+
+
+
