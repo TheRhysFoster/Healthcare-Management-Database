@@ -376,7 +376,7 @@ The amount of records in the database sits at around 12300+ which is miniscule c
 
 Given the small amount of records that currently exist, sequential scans are planning and executing faster than indexed scans. This is to be expected with such a small dataset. In a real world scenario including millions of records per table, the opposite would take place and the need for indexes would be more evident. 
 
-Imagine hundreds of staff members have clocked in for their shifts at the hospital and throughout the day check what appointments they need to attend. The staff will be logged into the hospitals website / software and access the appointments section. Each time this section is refreshed or loaded, a query written in the front end is sent to the backend to be executed on the database. The main piece of data included in the query will be the staff's ID. The staff ID (staff_id) makes up **PART** of the `WHERE` clauses in the query. Given that these appointments are for the day, all completed, cancelled or rescheduled appointments should not be displayed.
+Imagine hundreds of staff members have clocked in for their shifts at the hospital and throughout the day check what appointments they need to attend. The staff will be logged into the hospitals website / software and access the appointments section. Each time this section is refreshed or loaded, a query written in the front-end is sent to the back-end to be executed. Given that these appointments are for the current day, then all completed, cancelled or rescheduled appointments should not be displayed.
 
 ```sql
 WHERE
@@ -389,10 +389,11 @@ AND
 	appointment.appointment_date < $3 
 ```
 
-*$ = Placeholder, 1 = First Argument (Staff ID), 2 = Second Argument (Current Date), 3 = Third Argument (Tomorrows Date)*
-*Date comparison has to be used because `appointment_date` is a TIMESTAMP and using ::date to only retrieve that date and remove the time would slow down the query*
+*$ = Placeholder, 1 = First Argument (Staff ID), 2 = Second Argument (Current Date + Midnight), 3 = Third Argument (Tomorrows Date + Midnight)*
 
-A sequential scan of `staff_appointment` and `appointment` to find the matching `appointment_status`, `appointment_date` and `staff_id` would read every single row of both tables. 
+*Date comparison has to be used because `appointment_date` is a TIMESTAMP and using ::date to remove the time would slow down the query*
+
+A sequential scan of `staff_appointment` and `appointment` to find the matching `appointment_status`, `appointment_date` and `staff_id` would read every single row of both tables causing major slowdowns in a database with millions of records. 
 
 ```sql
 CREATE INDEX appointment_status_and_date_idx ON appointment(appointment_status, appointment_date);
@@ -400,11 +401,55 @@ CREATE INDEX ON staff_appointment(staff_id);
 ```
 The above indexes allow the database to first view a "Map" which shows which page or chunk the matching rows are in and then head directly there ignoring all irrelevant rows. This usually takes execution time down from seconds to milliseconds for extremely large datasets.
 
-Currently, only attributes that are in `JOINs` when querying OR in `WHERE` clauses have been indexed manually. PSQL automatically indexes any created attribute using a `UNIQUE` constraint. Since the database is not live and in use, the `CONCURRENTLY` option was not used as there was not a risk of blocking WRITEs.
+Attributes that are in `JOINs` OR `WHERE` clauses when querying have been indexed manually. PSQL automatically indexes any attribute that uses a `UNIQUE` constraint. Since the database is not live / in use, the `CONCURRENTLY` option was not used as there is not a risk of blocking WRITEs.
 
 
+## 🔍 Querying / Views
 
+### 🩺 Heart Disease Indicator
+<details>
+  <summary>🔍 Click To View Query: (Patient Heart Disease Indicators)</summary>
 
+```sql
+CREATE VIEW
+	patient_heart_disease_indicators AS
+		SELECT DISTINCT ON(pi.patient_id)
+			EXTRACT(YEAR FROM age(current_date, date_of_birth)) AS "Patient Age",
+			pi.hdl AS "HDL Count",
+			pi.ldl AS "LDL Count",
+			pi.triglycerides AS "Triglycerides Count",
+			pi.total_cholesterol AS "Total Cholesterol",
+			pi.systolic AS "Systolic Pressure",
+			pi.diastolic AS "Diastolic Pressure",
+			pi.blood_sugar AS "Blood Sugar Level",
+			CASE
+				WHEN pl.smoking_usage = 'Trying to quit' THEN 'YES'
+				WHEN pl.smoking_usage = 'Used to smoke' THEN 'NO'
+				WHEN pl.smoking_usage = 'None' THEN 'NO'
+			END AS "Smoker"
+		FROM
+			patient p
+		JOIN
+			patient_indicator pi
+		ON
+			p.patient_id = pi.patient_id
+		JOIN
+			patient_lifestyle pl
+		ON
+			pi.patient_id = pl.patient_id
+		JOIN
+			patient_illness pil
+		ON
+			pi.patient_id = pil.patient_id
+		WHERE
+			pil.illness_id = 2
+		ORDER BY
+			pi.patient_id, pi.date_confirmed DESC;
+
+```
+</details>
+
+![Heart Disease Indicator](Docs/Patient%20Heart%20Disease%20Indicators.png)  
 
 
 
