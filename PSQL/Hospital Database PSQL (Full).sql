@@ -651,7 +651,7 @@ CREATE VIEW
 			pi.blood_sugar AS "Blood Sugar Level",
 			CASE
 				WHEN pl.smoking_usage = 'Trying to quit' THEN 'YES'
-				WHEN pl.smoking_usage = 'Used to smoke' THEN 'NO'
+				WHEN pl.smoking_usage = 'Used to smoke' THEN 'QUIT'
 				WHEN pl.smoking_usage = 'None' THEN 'NO'
 			END AS "Smoker"
 		FROM
