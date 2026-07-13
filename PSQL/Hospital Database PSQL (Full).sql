@@ -677,7 +677,8 @@ CREATE VIEW
 	patient_heart_disease_symptoms AS
 		SELECT
 			s.name AS "Coronary Heart Disease Symptoms",
-			CONCAT(ROUND((COUNT(aps.symptom_id)::numeric / (SELECT COUNT(apr.appointment_id) FROM appointment_result apr WHERE apr.illness_id = 2) * 100), 2), '%') AS "Occurence Percentage"
+			CONCAT(ROUND((COUNT(aps.symptom_id)::numeric / (SELECT COUNT(apr.appointment_id) FROM appointment_result apr WHERE apr.illness_id = 2) * 100), 2), '%') AS "Occurence Percentage",
+			COUNT(aps.symptom_id) AS "Occurence Count"
 		FROM
 			symptom s
 		JOIN
@@ -753,6 +754,8 @@ GROUP BY
 ORDER BY
 	"Date & Time"
 ASC;
+
+
 
 -- ******************************** DATA INSERTION STARTS HERE ******************************** --
 
