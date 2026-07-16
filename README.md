@@ -448,8 +448,13 @@ CREATE VIEW
 
 ```
 </details>
+**Result Example:**
 
 ![Heart Disease Indicator](Docs/Patient%20Heart%20Disease%20Indicators.png)  
+
+This query collects relevant indicators in regards to heart health from the `patient_indicator` and `patient_lifestyle` entities, then limits the results to patients who have been diagnosed with Coronary Heart Disease. The set of `patient_indicator` data used per patient is the latest. This is based on the assumption that when a patient visits their GP with specific symptoms, the GP will be able to relate this symptoms to heart health and blood work will be ordered. The results from this blood work will mean a new entry into `patient_indicator`.
+
+The purpose of this query is to find any correlation between these indicators (e.g LDL Count) and a specific disease (any illness can be plugged into the query). The results will best serve a medical analyst in external tools such as PowerBI. In PowerBI, analysts can create filters on specific attributes (e.g slide bars) and when changing the desired value of an attribute the results will increase or decrease. 
 
 
 
