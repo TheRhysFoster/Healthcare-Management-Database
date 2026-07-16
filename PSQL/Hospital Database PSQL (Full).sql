@@ -668,8 +668,20 @@ CREATE VIEW
 			patient_illness pil
 		ON
 			pi.patient_id = pil.patient_id
+		JOIN
+			appointment a
+		ON
+			p.patient_id = a.patient_id
+		JOIN
+			appointment_result ar
+		ON
+			a.appointment_id = ar.appointment_id
 		WHERE
 			pil.illness_id = 2
+		AND
+			pi.date_confirmed BETWEEN (ar.confirmed_date - INTERVAL '365 days')
+				AND
+					(ar.confirmed_date + INTERVAL'365 days')
 		ORDER BY
 			pi.patient_id, pi.date_confirmed DESC;
 
@@ -677,8 +689,7 @@ CREATE VIEW
 	patient_heart_disease_symptoms AS
 		SELECT
 			s.name AS "Coronary Heart Disease Symptoms",
-			CONCAT(ROUND((COUNT(aps.symptom_id)::numeric / (SELECT COUNT(apr.appointment_id) FROM appointment_result apr WHERE apr.illness_id = 2) * 100), 2), '%') AS "Occurence Percentage",
-			COUNT(aps.symptom_id) AS "Occurence Count"
+			CONCAT(ROUND((COUNT(aps.symptom_id)::numeric / (SELECT COUNT(apr.appointment_id) FROM appointment_result apr WHERE apr.illness_id = 2) * 100), 2), '%') AS "Occurence Percentage"
 		FROM
 			symptom s
 		JOIN
@@ -730,6 +741,8 @@ JOIN
 	staff_appointment sp
 ON
 	a.appointment_id = sp.appointment_id
+		AND
+			sp.staff_id != 1
 JOIN
 	staff s
 ON
