@@ -280,7 +280,7 @@ Similar to the previous function, a conditional IF statement is used to determin
 
 In terms of the `shift` table, attributes such as `shift_start`, `shift_end`, `clocked_in` and `clocked_out` are used to calculate whether a staff member was late, early or stayed for extra time after their shift. The specific amount of time a staff member was late, early or overstayed by is also calculated for the record.
 
-The `feedback` table stores any positive or negative reviews by patients about staff members. Before inserting all reviews into `staff_performance`, the BOOLEAN attribute `verified` needs to be TRUE. This means that hypothetically another member of staff has reviewed the case, and using the front-end system sets the review of the patient to verified.
+The `feedback` table stores any positive or negative reviews by patients about staff members. Before inserting all reviews into `staff_performance`, the boolean attribute `verified` needs to be TRUE. This means that hypothetically another member of staff has reviewed the case, and using the front-end system sets the review of the patient to verified.
 
 This type of performance data will be useful to managers who need to monitor employees work ethic, behaviour and any progression being made OR larger queries to monitor the overall standard of entire hospitals.
 
@@ -343,9 +343,9 @@ Findings: '4cm Tumour on right lobe, Right lobe tumour successfully removed`
 
 If a patient was diagnosed with Stage 3 Lung Cancer and later went into remission, the `condition` would be set to `Cured`. It is only after this if they are unfortunately diagnosed with the same illness again, a new record will be added as it would be the start of a new illness cycle.
 
-**What happens if the existing record `condition` value isn't `Cured`, but a new `appointment_result` entry has the same `illness_id` recorded in `patient_illness`?**
+**What happens if the existing record's `condition` value isn't `Cured`, but a new `appointment_result` entry has the same `illness_id` recorded in `patient_illness`?**
 
-Instead of creating a new record for the same illness, the current record and it's `findings` attribute are concantenated with new medical data gathered during the appointment.
+Instead of creating a new record for the same illness, the current record and it's `findings` value are concantenated with new medical data gathered during the appointment.
 
 *Imagine the original appointment revealed that the patient has a 5cm tumour on their left lobe.*
 
@@ -391,7 +391,7 @@ AND
 
 *$ = Placeholder, 1 = First Argument (Staff ID), 2 = Second Argument (Current Date + Midnight), 3 = Third Argument (Tomorrows Date + Midnight)*
 
-*Date comparison has to be used because `appointment_date` is a TIMESTAMP and using ::date to remove the time would slow down the query*
+*Date comparison has to be used because `appointment_date` is a TIMESTAMP and using `::date` to remove the time would slow down the query*
 
 A sequential scan of `staff_appointment` and `appointment` to find the matching `appointment_status`, `appointment_date` and `staff_id` would read every single row of both tables causing major slowdowns in a database with millions of records. 
 
@@ -399,16 +399,18 @@ A sequential scan of `staff_appointment` and `appointment` to find the matching 
 CREATE INDEX appointment_status_and_date_idx ON appointment(appointment_status, appointment_date);
 CREATE INDEX ON staff_appointment(staff_id);
 ```
-The above indexes allow the database to first view a "Map" which shows which page or chunk the matching rows are in and then head directly there ignoring all irrelevant rows. This usually takes execution time down from seconds to milliseconds for extremely large datasets.
+The above indexes allow the database to first view a type of "map" which shows which page or chunk the matching rows are in and then head directly there ignoring all irrelevant rows. This usually takes execution time down from seconds to milliseconds for extremely large datasets.
 
-Attributes that are in `JOINs` OR `WHERE` clauses when querying have been indexed manually. PSQL automatically indexes any attribute that uses a `UNIQUE` constraint. Since the database is not live / in use, the `CONCURRENTLY` option was not used as there is not a risk of blocking WRITEs.
+Attributes that are in `JOINs` OR `WHERE` clauses when querying have been indexed manually, including some foreign keys as they are not automatically indexed like other RDBMS. Being able to manually index foreign keys is a better option in database design because some FKs won't ever be used in queries, therefore saving space by leaving them as non-indexed attributes. 
+
+PSQL does automatically index any attribute that uses a `UNIQUE` constraint. Since the database is not live / in use, the `CONCURRENTLY` option was not used as there is not a risk of blocking WRITEs at this time.
 
 
-## 🔍 Querying / Views
+## 🔍 Queries & Views
 
 ### 🩺 Heart Disease Indicator
 <details>
-  <summary>🔍 Click To View Query: (Patient Heart Disease Indicators)</summary>
+  <summary>🔍 Click To View Query: (Heart Disease Indicators)</summary>
 
 ```sql
 CREATE VIEW
@@ -424,7 +426,7 @@ CREATE VIEW
 			pi.blood_sugar AS "Blood Sugar Level",
 			CASE
 				WHEN pl.smoking_usage = 'Trying to quit' THEN 'YES'
-				WHEN pl.smoking_usage = 'Used to smoke' THEN 'NO'
+				WHEN pl.smoking_usage = 'Used to smoke' THEN 'QUIT'
 				WHEN pl.smoking_usage = 'None' THEN 'NO'
 			END AS "Smoker"
 		FROM
@@ -441,20 +443,138 @@ CREATE VIEW
 			patient_illness pil
 		ON
 			pi.patient_id = pil.patient_id
+		JOIN
+			appointment a
+		ON
+			p.patient_id = a.patient_id
+		JOIN
+			appointment_result ar
+		ON
+			a.appointment_id = ar.appointment_id
 		WHERE
 			pil.illness_id = 2
+		AND
+			pi.date_confirmed BETWEEN (ar.confirmed_date - INTERVAL '365 days')
+				AND
+					(ar.confirmed_date + INTERVAL'365 days')
 		ORDER BY
 			pi.patient_id, pi.date_confirmed DESC;
 
 ```
 </details>
-**Result Example:**
 
 ![Heart Disease Indicator](Docs/Patient%20Heart%20Disease%20Indicators.png)  
 
-This query collects relevant indicators in regards to heart health from the `patient_indicator` and `patient_lifestyle` entities, then limits the results to patients who have been diagnosed with Coronary Heart Disease. The set of `patient_indicator` data used per patient is the latest. This is based on the assumption that when a patient visits their GP with specific symptoms, the GP will be able to relate this symptoms to heart health and blood work will be ordered. The results from this blood work will mean a new entry into `patient_indicator`.
+This query collects relevant indicators in regards to heart health from the `patient_indicator` and `patient_lifestyle` entities, then limits the results to patients who have been diagnosed with Coronary Heart Disease. It makes sure that only one set of data from `patient_indicator` per patient is returned and that it is within a certain timeframe from the diagnosis date. Realistically that window would be a lot smaller (e.g 6 months).
 
-The purpose of this query is to find any correlation between these indicators (e.g LDL Count) and a specific disease (any illness can be plugged into the query). The results will best serve a medical analyst in external tools such as PowerBI. In PowerBI, analysts can create filters on specific attributes (e.g slide bars) and when changing the desired value of an attribute the results will increase or decrease. 
+The purpose of this query is to find any correlation between these indicators and heart disease. The results will best serve a medical analyst in external tools. In PowerBI, analysts can create filters on specific attributes and change the desired range which effects the amount of records displayed.
+
+For example, placing a filter on 'LDL Count' and slowly reducing the range may cause less results to show. An analyst may conclude that a high amount of LDL is one of the contributors towards this specific heart condition.
 
 
+### 🩺 Heart Disease Symptoms
+<details>
+  <summary>🔍 Click To View Query: (Heart Disease Symptoms)</summary>
 
+```sql
+CREATE VIEW
+	patient_heart_disease_symptoms AS
+		SELECT
+			s.name AS "Coronary Heart Disease Symptoms",
+			CONCAT(ROUND((COUNT(aps.symptom_id)::numeric / (SELECT COUNT(apr.appointment_id) FROM appointment_result apr WHERE apr.illness_id = 2) * 100), 2), '%') AS "Occurence Percentage",
+			COUNT(aps.symptom_id) AS "Occurence Count"
+		FROM
+			symptom s
+		JOIN
+			appointment_symptom aps
+		ON
+			s.symptom_id = aps.symptom_id
+		JOIN
+			appointment_result apr
+		ON
+			aps.appointment_id = apr.appointment_id
+		WHERE
+			apr.illness_id = 2
+		GROUP BY 
+			s.symptom_id
+		ORDER BY
+			"Occurence Percentage" DESC;
+
+```
+</details>
+
+![Heart Disease Symptoms](Docs/Patient%20Heart%20Disease%20Symptoms.png)
+
+A more simple, static query that any illness can be inserted into. It gathers all symptoms patients present with before being diagnosed, and then orders them from highest to lowest occurence. With this type of query, external tools won't be necessary to extract information, but still provides useful information for those dealing with patients and showing them what symptoms and combinations thereof to look out for.
+👨‍⚕️ Staff Appointments
+<details>
+  <summary>🔍 Click To View Query: (Staff Appointments)</summary>
+
+```sql
+WITH 
+	staff_appointments 
+AS
+	(
+		SELECT
+			sp1.appointment_id
+		FROM
+			staff_appointment sp1
+		JOIN
+			appointment a1
+		ON
+			sp1.appointment_id = a1.appointment_id
+		WHERE
+			sp1.staff_id = 1
+		AND
+			a1.appointment_status = 'Scheduled'
+	)
+
+SELECT
+	CONCAT(p.first_name, ' ', p.last_name) AS "Patient",
+	d.name AS "Department",
+	a.appointment_date AS "Date & Time",
+	i.name AS "Medical Intervention",
+	STRING_AGG(s.first_name || ' ' || s.last_name, ', ') AS "Assigned Staff"
+FROM
+	appointment a
+JOIN
+	staff_appointments sps
+ON
+	a.appointment_id = sps.appointment_id
+JOIN
+	staff_appointment sp
+ON
+	a.appointment_id = sp.appointment_id
+		AND
+			sp.staff_id != 1
+JOIN
+	staff s
+ON
+	sp.staff_id = s.staff_id
+JOIN
+	patient p 
+ON
+	a.patient_id = p.patient_id
+JOIN
+	department d
+ON
+	a.department_id = d.department_id
+JOIN
+	intervention i 
+ON
+	a.intervention_id = i.intervention_id
+GROUP BY 
+	"Patient",
+	"Department",
+	"Date & Time",
+	"Medical Intervention"
+ORDER BY
+	"Date & Time"
+ASC;
+
+```
+</details>
+
+![Staff Appointments](Docs/Staff%20Appointments.png)
+
+This is one example of how a query would work to retrieve a specific staff members appointments. Due to having the extra "Assigned Staff" column, a WITH clause was necessary to make sure all of `staff_id = 1` appointments were listed but doesn't exclude other potential staff members assigned to these appointments.
