@@ -28,7 +28,8 @@ CREATE INDEX ON appointment(patient_id);
 CREATE INDEX ON appointment(department_id);
 CREATE INDEX ON appointment(hospital_id);
 CREATE INDEX ON appointment(intervention_id);
-
+CREATE INDEX appointment_status_and_date_idx ON appointment(appointment_status, appointment_date);
+	
 CREATE INDEX ON appointment_stock(appointment_id);
 CREATE INDEX ON appointment_stock(stock_id);
 
