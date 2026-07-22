@@ -87,21 +87,21 @@ Some patients may be using multiple types of recreational drugs. A junction tabl
 
 **The three reasons for part of the composite key using `patient_lifestyle_id` instead of `patient_id` are:**
 
-*Recreational usage is a lifestyle choice and being linked to `patient_lifestyle` keeps all relevant information intact held together by `date_confirmed` and the `patient_lifestyle_id`.*
+Recreational usage is a lifestyle choice and being linked to `patient_lifestyle` keeps all relevant information intact held together by `date_confirmed` and the `patient_lifestyle_id`.
 
-*Using `patient_id` would cause the primary key constraint to fail*
+Using `patient_id` would cause the primary key constraint to fail
 
-*`recreation_id` would only hold one value if placed in the `patient_lifestyle` entity*
+`recreation_id` would only hold one value if placed in the `patient_lifestyle` entity
   
 **If a patient has three entries into `patient_recreational_usage` but the composite key was instead made up of `patient_id` and `recreational_id`, then:**
 
-*✅ The first states they are using type 1 (`patient_id` = 1, `recreation_id` = 1)*
+*✅ The first record states patient is using type 1 (`patient_id` = 1, `recreation_id` = 1)*
 
-*✅ The second states they aren't using any (no `patient_recreationl_usage` entry)*
+*✅ Patient stops using type 1*
 
-*❌ The third states they are using type 1 again (`patient_id` = 1, `recreation_id` = 1)*
+*❌ The third record states patient has started using type 1 again (`patient_id` = 1, `recreation_id` = 1)*
 
-The third step is what will fail the constraint.
+The third step is what will fail the constraint as that composite key combination will already exist.
 
 ### JT2) Illness Types
 To begin with, the `illness_type_id` was included in the `illness` table, but some illnesses do fall under two categories which is why the junction was needed. For example, lung cancer would be classified as 'Respiratory' and 'Cancer'.
