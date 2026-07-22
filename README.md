@@ -1,4 +1,4 @@
-# 🏥 Hospital Database
+# 🏥 Healthcare Management Database
 A PostgreSQL database that handles core hospital operations and medical data by utilizing triggers and functions for necessary automation and indexes for real-world query performance.
 
 **Includes but not limited to:**
