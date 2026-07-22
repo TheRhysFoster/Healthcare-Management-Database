@@ -506,7 +506,8 @@ CREATE VIEW
 ![Heart Disease Symptoms](Docs/Patient%20Heart%20Disease%20Symptoms.png)
 
 A more simple, static query that any illness can be inserted into. It gathers all symptoms patients present with before being diagnosed, and then orders them from highest to lowest occurence. With this type of query, external tools won't be necessary to extract information, but still provides useful information for those dealing with patients and showing them what symptoms and combinations thereof to look out for.
-👨‍⚕️ Staff Appointments
+
+### 👨‍⚕️ Staff Appointments
 <details>
   <summary>🔍 Click To View Query: (Staff Appointments)</summary>
 
@@ -577,4 +578,4 @@ ASC;
 
 ![Staff Appointments](Docs/Staff%20Appointments.png)
 
-This is one example of how a query would work to retrieve a specific staff members appointments. Due to having the extra "Assigned Staff" column, a WITH clause was necessary to make sure all of `staff_id = 1` appointments were listed but doesn't exclude other potential staff members assigned to these appointments.
+This is one example of how a query would work to retrieve a specific staff members appointments. Due to having the extra "Assigned Staff" column, a WITH clause was necessary to make sure all of `staff_id = 1` appointments were listed but doesn't exclude other potential assigned staff members. The most important data is shown so the staff member knows where the appointment will take place, what intervention is needed, who they'll be working with and the date / time. In terms of the reasons or symptoms for the appointment, that will be handled by another query when the staff want to look at the details patients and GPs provided.
