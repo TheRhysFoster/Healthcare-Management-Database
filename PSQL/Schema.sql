@@ -134,12 +134,12 @@ CREATE TABLE patient(
 CREATE TABLE patient_lifestyle(
 	patient_lifestyle_id SERIAL PRIMARY KEY,
 	patient_id INT NOT NULL REFERENCES patient(patient_id),
-	smoking_usage smoking_usage NOT NULL,
+	smoking_usage smoking_usage,
 	smoking_amount SMALLINT,
-	alcohol_usage alcohol_usage NOT NULL,
+	alcohol_usage alcohol_usage,
 	alcohol_amount NUMERIC(4,1),
-	exercise_amount exercise_amount NOT NULL,
-	dietary_type dietary_type NOT NULL,
+	exercise_amount exercise_amount,
+	dietary_type dietary_type,
 	notes TEXT,
 	date_confirmed DATE NOT NULL
 );
