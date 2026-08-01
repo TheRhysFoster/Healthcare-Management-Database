@@ -413,10 +413,9 @@ CREATE INDEX ON patient_indicator(patient_id);
 
 CREATE INDEX ON patient_illness(patient_id);
 CREATE INDEX ON patient_illness(illness_id);
-CREATE INDEX ON patient_illness(staff_id);
 
 CREATE INDEX ON patient_lifestyle(patient_id);
-CREATE INDEX ON patient_recreational_usage(patient_lifestyle_id)
+CREATE INDEX ON patient_recreational_usage(patient_lifestyle_id);
 CREATE INDEX ON patient_recreational_usage(recreation_id);
 
 
