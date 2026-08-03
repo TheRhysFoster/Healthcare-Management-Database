@@ -595,9 +595,22 @@ cd C:\Users\Rhys\Documents\AWS
 scp -i "HMS_key.pem" "healthcare_management_database.sql" ubuntu@51.21.***.**:~
 ```
 
-Once the SQL file has been moved to the server, we login through secure shell and make necessary changes to ensure that the file can be executed.
+Once the SQL file has been moved to the server, we login through secure shell using my private key and make changes to ensure that the database can be created.
 
 ```
 ssh -i "HMS_key.pem" ubuntu@51.21.***.**
 ```
+Once logged in, gather the latest package versions from the Ubuntu servers and then install the latest version of PostgreSQL and it's additional packages.
+```
+sudo apt update && sudo apt install postgresql postgresql-contrib
+```
+When the file was transferred to the server, it ends up in the `/home/ubuntu` directory. It needs to be moved to a more appropriate location.
 
+First create the new directory where the .SQL file will be stored.
+```
+sudo mkdir -p /opt/healthcare_management/scripts
+```
+Then move it to that directory.
+```
+sudo mv /home/ubuntu/healthcare_management_database.sql /opt/healthcare_management/scripts
+```
