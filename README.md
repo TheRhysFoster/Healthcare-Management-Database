@@ -580,7 +580,7 @@ ASC;
 
 This is one example of how a query would work to retrieve a specific staff members appointments. Due to having the extra "Assigned Staff" column, a WITH clause was necessary to make sure all of `staff_id = 1` appointments were listed but doesn't exclude other potential assigned staff members. The most important data is shown so the staff member knows where the appointment will take place, what intervention is needed, who they'll be working with and the date / time. In terms of the reasons or symptoms for the appointment, that will be handled by another query when the staff want to look at the details patients and GPs provided.
 
-## 🖥️ AWS & Linux Server Setup
+## 🖥️ AWS / Linux Server
 
 ### 🌐 AWS Instance
 For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
