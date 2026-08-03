@@ -586,3 +586,13 @@ This is one example of how a query would work to retrieve a specific staff membe
 For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
 
 ### 🛠️ Installing PostgreSQL & Configuring Users / Permissions
+The first step was to transfer the database dump .SQL file (schema, inserts, indexing, stored procedures, triggers and queries) to the server. The first step is navigating to the directory containing the SQL file and private key file. After this we use the Secure Copy Protocol (SCP) to transfer the file from my local machine to the server.
+
+```
+cd C:\Users\Rhys\Documents\AWS
+scp -i "HMS_key.pem" "healthcare_management_database.sql" ubuntu@51.21.***.**:~
+```
+
+Once the SQL file has been moved to the server, it's time to login directly and make necessary changes to make sure that the file can be executed.
+
+```
