@@ -597,7 +597,7 @@ After this we use the Secure Copy Protocol (SCP) to transfer the file from my lo
 ```
 scp -i "HMS_key.pem" "healthcare_management_database.sql" ubuntu@51.21.***.**:~
 ```
-![SQL File Transfer](Docs/SQL%20File%20Transfer.png)
+![SQL File Transfer](Docs/SQL%20File%20Transfer.PNG)
 
 Once the SQL file has been moved to the server, we login through secure shell using my private key and make changes to ensure that the database can be created.
 ```
@@ -611,13 +611,13 @@ Use Package Manager to check if the installation was successful
 ```
 dpkg -l | grep postgresql
 ```
-![PSQL Install Confirmation](Docs/PSQL%20Install%20Confirmation.png)
+![PSQL Install Confirmation](Docs/PSQL%20Install%20Confirmation.PNG)
 
 Then use System Control to check if the PSQL service is running
 ```
 sudo systemctl status postgresql
 ```
-![PSQL Service Check](Docs/PSQL%20Service%20Check.png)
+![PSQL Service Check](Docs/PSQL%20Service%20Check.PNG)
 
 When the file was transferred to the server, it ends up in the `/home/ubuntu` directory. It needs to be moved to a more appropriate location.
 
@@ -629,7 +629,7 @@ Then move it to that directory.
 ```
 sudo mv /home/ubuntu/healthcare_management_database.sql /opt/healthcare_management/scripts
 ```
-Now that PSQL is installed, the service is running and the database dump is in a specific directory, the file can now be run and the database created
+Now that PSQL is installed, the service is running and the database dump is in a specific directory, the file can now be run and the database created.
 ```
 sudo -u postgres psql -f /opt/healthcare_management/scripts/healthcare_management_database.sql 
 ```
