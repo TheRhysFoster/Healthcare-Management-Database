@@ -579,3 +579,50 @@ ASC;
 ![Staff Appointments](Docs/Staff%20Appointments.png)
 
 This is one example of how a query would work to retrieve a specific staff members appointments. Due to having the extra "Assigned Staff" column, a WITH clause was necessary to make sure all of `staff_id = 1` appointments were listed but doesn't exclude other potential assigned staff members. The most important data is shown so the staff member knows where the appointment will take place, what intervention is needed, who they'll be working with and the date / time. In terms of the reasons or symptoms for the appointment, that will be handled by another query when the staff want to look at the details patients and GPs provided.
+
+## 🖥️ AWS / Linux Server
+
+### 🌐 AWS Instance
+For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
+
+### 🛠️ Installing PostgreSQL Packages & Initializing Database
+The first step was to transfer the database dump SQL file (schema, inserts, indexing, stored procedures, triggers and queries) to the server
+
+Navigate to the directory containing the SQL file and private key file. 
+```
+cd C:\Users\Rhys\Documents\AWS
+```
+After this we use the Secure Copy Protocol (SCP) to transfer the file from my local machine to the server.
+
+```
+scp -i "HMS_key.pem" "healthcare_management_database.sql" ubuntu@51.21.***.**:~
+```
+FILE TRANSFER SCREENSHOT HERE
+Once the SQL file has been moved to the server, we login through secure shell using my private key and make changes to ensure that the database can be created.
+```
+ssh -i "HMS_key.pem" ubuntu@51.21.***.**
+```
+Once logged in, gather the latest package versions from the Ubuntu servers and then install the latest version of PostgreSQL and it's additional packages.
+```
+sudo apt update && sudo apt install postgresql postgresql-contrib
+```
+Use Package Manager to check if the installation was successful
+```
+dpkg -l | grep postgresql
+```
+INSTALLED SCREENSHOT HERE!
+Then use System Control to check if the PSQL service is running
+```
+sudo systemctl status postgresql
+```
+SERVICE SCREENSHOT HERE!
+When the file was transferred to the server, it ends up in the `/home/ubuntu` directory. It needs to be moved to a more appropriate location.
+
+First create the new directory where the SQL file will be stored.
+```
+sudo mkdir -p /opt/healthcare_management/scripts
+```
+Then move it to that directory.
+```
+sudo mv /home/ubuntu/healthcare_management_database.sql /opt/healthcare_management/scripts
+```
