@@ -590,9 +590,14 @@ The first step was to transfer the database dump .SQL file (schema, inserts, ind
 
 ```
 cd C:\Users\Rhys\Documents\AWS
+```
+```
 scp -i "HMS_key.pem" "healthcare_management_database.sql" ubuntu@51.21.***.**:~
 ```
 
-Once the SQL file has been moved to the server, it's time to login directly and make necessary changes to make sure that the file can be executed.
+Once the SQL file has been moved to the server, we login through secure shell and make necessary changes to ensure that the file can be executed.
 
 ```
+ssh -i "HMS_key.pem" ubuntu@51.21.***.**
+```
+
