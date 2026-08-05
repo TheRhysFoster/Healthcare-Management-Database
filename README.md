@@ -644,10 +644,20 @@ sudo -u postgres psql -d hospital_database
 ```sql
 CREATE ROLE senior_dba WITH LOGIN PASSWORD '************';
 ```
-Earlier on, the database was initialized by the `postgres` user causing it to be the natural owner. For a senior database administrator to have full reign, that ownership needs to be transferred.
+Earlier on, the database was initialized by the `postgres` user causing it to be the natural owner. For a senior database administrator to have full reign, that ownership needs to be transferred. Just relying on `ALTER DATABASE` and `ALTER SCHEMA` isn't always reliable. To be sure that full ownership goes to `senior_dba`, granting privileges on existing tables and any created in the future avoids any potential permissions issues.
 ```sql
 ALTER DATABASE hospital_database OWNER TO senior_dba;
 ALTER SCHEMA public OWNER TO senior_dba;
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO senior_dba;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO senior_dba;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO senior_dba;
+GRANT ALL PRIVILEGES ON ALL ROUTINES IN SCHEMA public TO senior_dba;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO senior_dba;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO senior_dba;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON FUNCTIONS TO senior_dba;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON ROUTINES TO senior_dba;
 ```
 Having full ownership over the database is common among senior DBAs but it comes with risks. This is why frequent backups are made and standard practices are used such as `BEGIN` and `ROLLBACK`, to make sure the outcome is what was intended and if not, then the change is not committed.
 
