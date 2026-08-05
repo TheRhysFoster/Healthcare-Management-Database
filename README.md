@@ -665,7 +665,7 @@ sudo nano /usr/local/sbin/psql_package_upgrade_perms.sh
 apt-get update
 apt-get install --only-upgrade -y postgresql postgresql-client postgresql-common postgresql-contrib
 ```
-This script will be triggered by `senior_dba` but all arguments are executed as `root` to gather the latest versions and then upgrading existing PSQL packages.
+This script will be triggered by `senior_dba` but all commands are executed as `root` to gather the latest versions and then upgrading existing PSQL packages.
 
 It should not be possible for other users to write to it. We need to change the owner of the script to `root` and modify the mode / permissions.
 ```
@@ -676,9 +676,9 @@ sudo chmod 755 /usr/local/sbin/psql_package_upgrade_perms.sh
 ```
 Owner of the file now has read, write and execute privileges, whereas the `Group Owner` and `Others` can only read and execute.
 
-Because `psql_package_upgrade_perms.sh` and systemctl commands need root privileges, the `senior_dba` user requires its own sudo config to allow both to run.
+Because `psql_package_upgrade_perms.sh` and `systemctl` commands need root privileges, the `senior_dba` user requires its own sudo config to allow both to run.
 
-The config will stored in `sudoers.d` instead of `sudoers` to prevent the file being overwritten during sudo package updates and to keep it separate from any future configs for other users.
+The config will be stored in `sudoers.d` instead of `sudoers` to prevent the file being overwritten during sudo package updates and to keep it separate from any future configs for other users.
 ```
 sudo visudo -f /etc/sudoers.d/senior_dba
 ```
