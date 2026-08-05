@@ -635,3 +635,16 @@ sudo -u postgres psql -f /opt/healthcare_management/scripts/healthcare_managemen
 ```
 
 ### 🔐 Creating Users & Managing Permissions
+Under the assumption that this instance will not only be hosting the database but also the web frontend and backend API, and that the DBA requires access to the instance to monitor the PSQL service and update necessary packages, user roles are needed to enforce the principle of least privilege.
+
+Let's start by connecting to the DB as the postgres role
+```
+sudo -u postgres psql -d hospital_database
+```
+Earlier on, the database was initialized by the postgres user causing it to be the natural owner. For a senior database administrator to have full reign, that ownership needs to be transferred.
+```sql
+CREATE ROLE senior_dba WITH LOGIN PASSWORD '************';
+ALTER DATABASE hospital_database OWNER TO senior_dba;
+REASSIGN OWNED BY postgres TO senior_dba;
+```
+Having full ownership over the database is common among senior DBAs but it comes with risks. This is why frequent backups are made and standard practices are used such a `BEGIN` and `ROLLBACK`, to make sure the outcome is what was intended and if not, then the change is not committed.
