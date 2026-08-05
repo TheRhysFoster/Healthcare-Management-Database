@@ -701,3 +701,19 @@ The config gets locked to read only for `Owner` and `Group Owner`. Users that fa
 ```
 sudo chmod 0440 /etc/sudoers.d/senior_dba
 ```
+As a faster way for the DBA to connect to the database directly on the server, a bash alias can be used.
+```bash
+echo "alias connect_hosp_db='psql -h localhost -U senior_dba -d hospital_database'" >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 🔑 Senior DBA Permission Checklist
+
+1) Can they alter the database?
+![Senior DBA Drop Table](Docs/Senior%20DBA%20Drop%20Table.PNG)
+
+2) Check the status of the PostgreSQL Service?
+![Senior DBA PSQL Status](Docs/Senior%20DBA%20PSQL%20Status.PNG)
+
+3) Update the PSQL Packages?
+![Senior DBA PSQL Update](Docs/Senior%20DBA%20PSQL%20Update.PNG)
