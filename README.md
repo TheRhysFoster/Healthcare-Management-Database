@@ -583,16 +583,16 @@ This is one example of how a query would work to retrieve a specific staff membe
 ## 🖥️ AWS / Linux Server
 
 ### 🌐 AWS Instance
-For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
+For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions of records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However, for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
 
 ### 🛠️ Installing PostgreSQL Packages & Initializing Database
-The first step was to transfer the database dump SQL file (schema, inserts, indexing, stored procedures, triggers and queries) to the server
+The first step was to transfer the database dump SQL file (schema, inserts, indexing, stored procedures, triggers and queries) to the server.
 
 Navigate to the directory containing the SQL file and private key file. 
 ```
 cd C:\Users\Rhys\Documents\AWS
 ```
-After this we use the Secure Copy Protocol (SCP) to transfer the file from my local machine to the server.
+After this we use the Secure Copy Protocol (SCP) to transfer the file from the local machine to the server.
 
 ```
 scp -i "HMS_key.pem" "healthcare_management_database.sql" ubuntu@51.21.***.**:~
@@ -603,17 +603,17 @@ Once the SQL file has been moved to the server, we login through secure shell us
 ```
 ssh -i "HMS_key.pem" ubuntu@51.21.***.**
 ```
-Once logged in, gather the latest package versions from the Ubuntu servers and then install the latest version of PostgreSQL and it's additional packages.
+Once logged in, gather the latest package versions from the Ubuntu servers and then install the latest version of PostgreSQL and its additional packages.
 ```
 sudo apt update && sudo apt install postgresql postgresql-contrib
 ```
-Use Package Manager to check if the installation was successful
+Use the Package Manager to check if the installation was successful
 ```
 dpkg -l | grep postgresql
 ```
 ![PSQL Install Confirmation](Docs/PSQL%20Install%20Confirmation.PNG)
 
-Then use System Control to check if the PSQL service is running
+Then use System Control (`systemctl`) to check if the PSQL service is running
 ```
 sudo systemctl status postgresql
 ```
@@ -665,7 +665,7 @@ sudo nano /usr/local/sbin/psql_package_upgrade_perms.sh
 apt-get update
 apt-get install --only-upgrade -y postgresql postgresql-client postgresql-common postgresql-contrib
 ```
-This script will be triggered by `senior_dba` but all commands are executed as `root` to gather the latest versions and then upgrading existing PSQL packages.
+This script will be triggered by `senior_dba` but all commands are executed as `root` to gather the latest versions and then upgrade existing PSQL packages.
 
 It should not be possible for other users to write to it. We need to change the owner of the script to `root` and modify the mode / permissions.
 ```
@@ -687,7 +687,7 @@ sudo visudo -f /etc/sudoers.d/senior_dba
 senior_dba ALL=(root) NOPASSWD: /usr/bin/systemctl status postgresql, /usr/bin/systemctl start postgresql, /usr/bin/systemctl stop postgresql, /usr/bin/systemctl restart postgresql
 senior_dba ALL=(root) NOPASSWD: /usr/local/sbin/psql_package_upgrade_perms.sh
 ```
-The config gets locked to read only for `Owner` and `Group Owner`. Users that fall under the `Others` class shouldn't be able to read what has been permitted to other users as it poses a security risk.
+The config gets locked to read only for `Owner` and `Group Owner`. Users that fall under the `Others` class shouldn't be able to read what has been permitted to different users as it poses a security risk.
 ```
 sudo chmod 0440 /etc/sudoers.d/senior_dba
 ```
