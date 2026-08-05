@@ -707,13 +707,16 @@ echo "alias connect_hosp_db='psql -h localhost -U senior_dba -d hospital_databas
 source ~/.bashrc
 ```
 
-### 🔑 Senior DBA Permission Checklist
+### 🔑 Senior DBA Checklist
 
-1) Can they alter the database?
+**1) Can they alter the database?**
+
 ![Senior DBA Drop Table](Docs/Senior%20DBA%20Drop%20Table.PNG)
 
-2) Check the status of the PostgreSQL Service?
+**2) Check the status of the PostgreSQL Service?**
+
 ![Senior DBA PSQL Status](Docs/Senior%20DBA%20PSQL%20Status.PNG)
 
-3) Update the PSQL Packages?
+**3) Update the PSQL Packages?**
+
 ![Senior DBA PSQL Update](Docs/Senior%20DBA%20PSQL%20Update.PNG)
