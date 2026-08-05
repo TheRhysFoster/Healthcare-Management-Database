@@ -651,12 +651,12 @@ ALTER SCHEMA public OWNER TO senior_dba;
 ```
 Having full ownership over the database is common among senior DBAs but it comes with risks. This is why frequent backups are made and standard practices are used such as `BEGIN` and `ROLLBACK`, to make sure the outcome is what was intended and if not, then the change is not committed.
 
-Create the Linux user account for the DBA
+The next step is creating the Linux user account.
 ```
 sudo adduser senior_dba
 ```
 
-Instead of allowing direct usage of `apt upgrade` / `apt install`, the user will be limited to PostgreSQL package upgrades. Although there are other ways of trying to force upgrade to only work when a specific package is mentioned by the user, there are many arguments that can be used with upgrade, potentially bypassing that restriction. To avoid this, a wrapper script will be used.
+Instead of allowing direct usage of `apt upgrade` / `apt install`, the user will be limited to PSQL package upgrades. Although there are other ways of trying to force upgrade to only work when a specific package is mentioned by the user, there are many arguments that can be used with upgrade, potentially bypassing that restriction. To avoid this, a wrapper script will be used.
 ```
 sudo nano /usr/local/sbin/psql_package_upgrade_perms.sh
 ```
@@ -674,7 +674,7 @@ sudo chown root:root /usr/local/sbin/psql_package_upgrade_perms.sh
 ```
 sudo chmod 755 /usr/local/sbin/psql_package_upgrade_perms.sh
 ```
-Owner of the file now has read, write and execute privileges, whereas the Group Owner and Others can only read and execute.
+Owner of the file now has read, write and execute privileges, whereas the `Group Owner` and `Others` can only read and execute.
 
 Because `psql_package_upgrade_perms.sh` and systemctl commands need root privileges, the `senior_dba` user requires its own sudo config to allow both to run.
 
@@ -687,7 +687,7 @@ sudo visudo -f /etc/sudoers.d/senior_dba
 senior_dba ALL=(root) NOPASSWD: /usr/bin/systemctl status postgresql, /usr/bin/systemctl start postgresql, /usr/bin/systemctl stop postgresql, /usr/bin/systemctl restart postgresql
 senior_dba ALL=(root) NOPASSWD: /usr/local/sbin/psql_package_upgrade_perms.sh
 ```
-The config gets locked to read only for Owner and Group Owner. `Others` users shouldn't be able to read what has been permitted to other users as it poses a security risk.
+The config gets locked to read only for `Owner` and `Group Owner`. Users that fall under the `Others` class shouldn't be able to read what has been permitted to other users as it poses a security risk.
 ```
 sudo chmod 0440 /etc/sudoers.d/senior_dba
 ```
