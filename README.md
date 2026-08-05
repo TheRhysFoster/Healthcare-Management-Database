@@ -583,16 +583,16 @@ This is one example of how a query would work to retrieve a specific staff membe
 ## 🖥️ AWS / Linux Server
 
 ### 🌐 AWS Instance
-For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
+For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions of records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However, for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
 
 ### 🛠️ Installing PostgreSQL Packages & Initializing Database
-The first step was to transfer the database dump SQL file (schema, inserts, indexing, stored procedures, triggers and queries) to the server
+The first step was to transfer the database dump SQL file (schema, inserts, indexing, stored procedures, triggers and queries) to the server.
 
 Navigate to the directory containing the SQL file and private key file. 
 ```
 cd C:\Users\Rhys\Documents\AWS
 ```
-After this we use the Secure Copy Protocol (SCP) to transfer the file from my local machine to the server.
+After this we use the Secure Copy Protocol (SCP) to transfer the file from the local machine to the server.
 
 ```
 scp -i "HMS_key.pem" "healthcare_management_database.sql" ubuntu@51.21.***.**:~
@@ -603,17 +603,17 @@ Once the SQL file has been moved to the server, we login through secure shell us
 ```
 ssh -i "HMS_key.pem" ubuntu@51.21.***.**
 ```
-Once logged in, gather the latest package versions from the Ubuntu servers and then install the latest version of PostgreSQL and it's additional packages.
+Once logged in, gather the latest package versions from the Ubuntu servers and then install the latest version of PostgreSQL and its additional packages.
 ```
 sudo apt update && sudo apt install postgresql postgresql-contrib
 ```
-Use Package Manager to check if the installation was successful
+Use the Package Manager to check if the installation was successful
 ```
 dpkg -l | grep postgresql
 ```
 ![PSQL Install Confirmation](Docs/PSQL%20Install%20Confirmation.PNG)
 
-Then use System Control to check if the PSQL service is running
+Then use System Control (`systemctl`) to check if the PSQL service is running
 ```
 sudo systemctl status postgresql
 ```
@@ -634,4 +634,86 @@ Now that PSQL is installed, the service is running and the database dump is in a
 sudo -u postgres psql -f /opt/healthcare_management/scripts/healthcare_management_database.sql 
 ```
 
-### 🔐 Creating Users & Managing Permissions
+### 🔐 Creating Users / Roles & Managing Permissions
+Under the assumption that this instance will not only be hosting the database but also the web frontend and backend API, and that the DBA requires access to the instance to monitor the PSQL service and update necessary packages, user roles are needed to enforce the principle of least privilege.
+
+Let's start by connecting to the DB as the `postgres` role, and creating a role for the DBA
+```
+sudo -u postgres psql -d hospital_database
+```
+```sql
+CREATE ROLE senior_dba WITH LOGIN PASSWORD '************';
+```
+Earlier on, the database was initialized by the `postgres` user causing it to be the natural owner. For a senior database administrator to have full reign, that ownership needs to be transferred. Just relying on `ALTER DATABASE` and `ALTER SCHEMA` isn't always reliable. To be sure that full ownership goes to `senior_dba`, granting privileges on existing tables and any created in the future avoids any potential permissions issues.
+```sql
+ALTER DATABASE hospital_database OWNER TO senior_dba;
+ALTER SCHEMA public OWNER TO senior_dba;
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO senior_dba;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO senior_dba;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO senior_dba;
+GRANT ALL PRIVILEGES ON ALL ROUTINES IN SCHEMA public TO senior_dba;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO senior_dba;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO senior_dba;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON FUNCTIONS TO senior_dba;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON ROUTINES TO senior_dba;
+```
+Having full ownership over the database is common among senior DBAs but it comes with risks. This is why frequent backups are made and standard practices are used such as `BEGIN` and `ROLLBACK`, to make sure the outcome is what was intended and if not, then the change is not committed.
+
+The next step is creating the Linux user account.
+```
+sudo adduser senior_dba
+```
+
+Instead of allowing direct usage of `apt upgrade` / `apt install`, the user will be limited to PSQL package upgrades. Although there are other ways of trying to force upgrade to only work when a specific package is mentioned by the user, there are many arguments that can be used with upgrade, potentially bypassing that restriction. To avoid this, a wrapper script will be used.
+```
+sudo nano /usr/local/sbin/psql_package_upgrade_perms.sh
+```
+```bash
+#!/bin/bash
+apt-get update
+apt-get install --only-upgrade -y postgresql postgresql-client postgresql-common postgresql-contrib
+```
+This script will be triggered by `senior_dba` but all commands are executed as `root` to gather the latest versions and then upgrade existing PSQL packages.
+
+It should not be possible for other users to write to it. We need to change the owner of the script to `root` and modify the mode / permissions.
+```
+sudo chown root:root /usr/local/sbin/psql_package_upgrade_perms.sh
+```
+```
+sudo chmod 755 /usr/local/sbin/psql_package_upgrade_perms.sh
+```
+Owner of the file now has read, write and execute privileges, whereas the `Group Owner` and `Others` can only read and execute.
+
+Because `psql_package_upgrade_perms.sh` and `systemctl` commands need root privileges, the `senior_dba` user requires its own sudo config to allow both to run.
+
+The config will be stored in `sudoers.d` instead of `sudoers` to prevent the file being overwritten during sudo package updates and to keep it separate from any future configs for other users.
+```
+sudo visudo -f /etc/sudoers.d/senior_dba
+```
+
+```
+senior_dba ALL=(root) NOPASSWD: /usr/bin/systemctl status postgresql, /usr/bin/systemctl start postgresql, /usr/bin/systemctl stop postgresql, /usr/bin/systemctl restart postgresql
+senior_dba ALL=(root) NOPASSWD: /usr/local/sbin/psql_package_upgrade_perms.sh
+```
+The config gets locked to read only for `Owner` and `Group Owner`. Users that fall under the `Others` class shouldn't be able to read what has been permitted to different users as it poses a security risk.
+```
+sudo chmod 0440 /etc/sudoers.d/senior_dba
+```
+As a faster way for the DBA to connect to the database directly on the server, a bash alias can be used.
+```bash
+echo "alias connect_hosp_db='psql -h localhost -U senior_dba -d hospital_database'" >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 🔑 Senior DBA Permission Checklist
+
+1) Can they alter the database?
+![Senior DBA Drop Table](Docs/Senior%20DBA%20Drop%20Table.PNG)
+
+2) Check the status of the PostgreSQL Service?
+![Senior DBA PSQL Status](Docs/Senior%20DBA%20PSQL%20Status.PNG)
+
+3) Update the PSQL Packages?
+![Senior DBA PSQL Update](Docs/Senior%20DBA%20PSQL%20Update.PNG)
