@@ -634,17 +634,60 @@ Now that PSQL is installed, the service is running and the database dump is in a
 sudo -u postgres psql -f /opt/healthcare_management/scripts/healthcare_management_database.sql 
 ```
 
-### 🔐 Creating Users & Managing Permissions
+### 🔐 Creating Users / Roles & Managing Permissions
 Under the assumption that this instance will not only be hosting the database but also the web frontend and backend API, and that the DBA requires access to the instance to monitor the PSQL service and update necessary packages, user roles are needed to enforce the principle of least privilege.
 
-Let's start by connecting to the DB as the postgres role
+Let's start by connecting to the DB as the `postgres` role, and creating a role for the DBA
 ```
 sudo -u postgres psql -d hospital_database
 ```
-Earlier on, the database was initialized by the postgres user causing it to be the natural owner. For a senior database administrator to have full reign, that ownership needs to be transferred.
 ```sql
 CREATE ROLE senior_dba WITH LOGIN PASSWORD '************';
-ALTER DATABASE hospital_database OWNER TO senior_dba;
-REASSIGN OWNED BY postgres TO senior_dba;
 ```
-Having full ownership over the database is common among senior DBAs but it comes with risks. This is why frequent backups are made and standard practices are used such a `BEGIN` and `ROLLBACK`, to make sure the outcome is what was intended and if not, then the change is not committed.
+Earlier on, the database was initialized by the `postgres` user causing it to be the natural owner. For a senior database administrator to have full reign, that ownership needs to be transferred.
+```sql
+ALTER DATABASE hospital_database OWNER TO senior_dba;
+ALTER SCHEMA public OWNER TO senior_dba;
+```
+Having full ownership over the database is common among senior DBAs but it comes with risks. This is why frequent backups are made and standard practices are used such as `BEGIN` and `ROLLBACK`, to make sure the outcome is what was intended and if not, then the change is not committed.
+
+Create the Linux user account for the DBA
+```
+sudo adduser senior_dba
+```
+
+Instead of allowing direct usage of `apt upgrade` / `apt install`, the user will be limited to PostgreSQL package upgrades. Although there are other ways of trying to force upgrade to only work when a specific package is mentioned by the user, there are many arguments that can be used with upgrade, potentially bypassing that restriction. To avoid this, a wrapper script will be used.
+```
+sudo nano /usr/local/sbin/psql_package_upgrade_perms.sh
+```
+```bash
+#!/bin/bash
+apt-get update
+apt-get install --only-upgrade -y postgresql postgresql-client postgresql-common postgresql-contrib
+```
+This script will be triggered by `senior_dba` but all arguments are executed as `root` to gather the latest versions and then upgrading existing PSQL packages.
+
+It should not be possible for other users to write to it. We need to change the owner of the script to `root` and modify the mode / permissions.
+```
+sudo chown root:root /usr/local/sbin/psql_package_upgrade_perms.sh
+```
+```
+sudo chmod 755 /usr/local/sbin/psql_package_upgrade_perms.sh
+```
+Owner of the file now has read, write and execute privileges, whereas the Group Owner and Others can only read and execute.
+
+Because `psql_package_upgrade_perms.sh` and systemctl commands need root privileges, the `senior_dba` user requires its own sudo config to allow both to run.
+
+The config will stored in `sudoers.d` instead of `sudoers` to prevent the file being overwritten during sudo package updates and to keep it separate from any future configs for other users.
+```
+sudo visudo -f /etc/sudoers.d/senior_dba
+```
+
+```
+senior_dba ALL=(root) NOPASSWD: /usr/bin/systemctl status postgresql, /usr/bin/systemctl start postgresql, /usr/bin/systemctl stop postgresql, /usr/bin/systemctl restart postgresql
+senior_dba ALL=(root) NOPASSWD: /usr/local/sbin/psql_package_upgrade_perms.sh
+```
+The config gets locked to read only for Owner and Group Owner. `Others` users shouldn't be able to read what has been permitted to other users as it poses a security risk.
+```
+sudo chmod 0440 /etc/sudoers.d/senior_dba
+```
