@@ -591,7 +591,7 @@ Port 443 (HTTPS) will be open to all IPs. This is so any requests made by a user
 
 An example of this is a receptionist booking a new appointment for a patient:
 
-**Frontend URL that is sent through the instance through Port 443:
+**Frontend URL that is sent through the instance through Port 443:**
 ```url
 https://fakenhs.co.uk/api/book_appointment/5/3/27/4/2026-12-26/Scheduled
 ```
