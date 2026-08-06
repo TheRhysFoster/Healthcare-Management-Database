@@ -585,10 +585,25 @@ This is one example of how a query would work to retrieve a specific staff membe
 ### 🌐 AWS Instance & Ports
 For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions of records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However, for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
 
-In a real world scenario, ports like 5432 (PostgreSQL) and 22 (SSH) will be set to only allow traffic from the company's static IP. When a DBA needs to access either the instance or database, a corporate VPN (e.g Cisco) is used to mask the users IP as the company static IP to gain access. On top of this, the VPN will usually require some form of authentication.
+In a real world scenario, ports like 5432 (PostgreSQL) and 22 (SSH) will be set to only allow traffic from the company's static IP. When a DBA needs to access either the instance or the database directly, a corporate VPN (e.g Cisco) is used to route traffic through the static IP. On top of this, the VPN will usually require some form of authentication. This is one of the more popular ways to gain access considering many workers who require access won't be on the network with that exact static IP (e.g remote workers, different offices).
 
-Port 443
+Port 443 (HTTPS) will be open to all IPs. This is so any requests made by a user from the system (website / software) can be passed through to the API (e.g Express). The API will need to validate whether the credentials are authenticated, if not it will reject the request.
 
+An example of this is a receptionist booking a new appointment for a patient:
+
+**Frontend URL that is sent through the instance through Port 443:
+```url
+https://fakenhs.co.uk/api/book_appointment/5/3/27/4/2026-12-26/Scheduled
+```
+
+**Backend that fills the predefined variables with the data from the above URL**
+```js
+app.post('/api/book_appointment/:patient_id/:department_id/:hospital_id/:intervention_id/:appointment_date/:appointment_status', async (req, res) => {
+
+	const{ patient_id, department_id, hospital_id, intervention_id, appointment_date, appointment_status } = req.params;
+
+});
+```
 ### 🛠️ Installing PostgreSQL Packages & Initializing Database
 The first step was to transfer the database dump SQL file (schema, inserts, indexing, stored procedures, triggers and queries) to the server.
 
