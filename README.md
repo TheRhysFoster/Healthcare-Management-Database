@@ -468,7 +468,7 @@ CREATE VIEW patient_heart_disease_indicators AS
 
 ![Heart Disease Indicator](Docs/Patient%20Heart%20Disease%20Indicators.png)  
 
-This query collects relevant indicators in regards to heart health from the `patient_indicator` and `patient_lifestyle` entities. It makes sure that only one set of data from `patient_indicator` per patient is returned and that it is within a certain timeframe from the diagnosis date. Realistically that window would be a lot smaller (e.g 6 months).
+This query collects relevant indicators in regards to heart health from the `patient_indicator` and `patient_lifestyle` entities.
 
 The purpose of this query is to find any correlation between these indicators and heart disease. The results will best serve a medical analyst in external tools. In PowerBI, analysts can create filters on specific attributes and change the desired range which effects the amount of records displayed.
 
