@@ -466,7 +466,7 @@ CREATE VIEW patient_heart_disease_indicators AS
 ```
 </details>
 
-![Heart Disease Indicator](Docs/Patient%20Heart%20Disease%20Indicators.png)  
+![Heart Disease Indicator](Docs/Patient%20Heart%20Disease%20Indicators.gif)  
 
 This query collects relevant indicators in regards to heart health from the `patient_indicator` and `patient_lifestyle` entities. It makes sure that only one set of data from `patient_indicator` per patient is returned and that it is within a certain timeframe from the diagnosis date. Realistically that window would be a lot smaller (e.g 6 months).
 
