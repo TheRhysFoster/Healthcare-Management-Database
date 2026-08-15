@@ -413,59 +413,62 @@ PSQL does automatically index any attribute that uses a `UNIQUE` constraint. Sin
   <summary>🔍 Click To View Query: (Heart Disease Indicators)</summary>
 
 ```sql
-CREATE VIEW
-	patient_heart_disease_indicators AS
-		SELECT DISTINCT ON(pi.patient_id)
-			EXTRACT(YEAR FROM age(current_date, date_of_birth)) AS "Patient Age",
-			pi.hdl AS "HDL Count",
-			pi.ldl AS "LDL Count",
-			pi.triglycerides AS "Triglycerides Count",
-			pi.total_cholesterol AS "Total Cholesterol",
-			pi.systolic AS "Systolic Pressure",
-			pi.diastolic AS "Diastolic Pressure",
-			pi.blood_sugar AS "Blood Sugar Level",
-			CASE
-				WHEN pl.smoking_usage = 'Trying to quit' THEN 'YES'
-				WHEN pl.smoking_usage = 'Used to smoke' THEN 'QUIT'
-				WHEN pl.smoking_usage = 'None' THEN 'NO'
-			END AS "Smoker"
-		FROM
-			patient p
-		JOIN
-			patient_indicator pi
-		ON
-			p.patient_id = pi.patient_id
-		JOIN
-			patient_lifestyle pl
-		ON
-			pi.patient_id = pl.patient_id
-		JOIN
-			patient_illness pil
-		ON
-			pi.patient_id = pil.patient_id
-		JOIN
-			appointment a
-		ON
-			p.patient_id = a.patient_id
-		JOIN
-			appointment_result ar
-		ON
-			a.appointment_id = ar.appointment_id
-		WHERE
-			pil.illness_id = 2
-		AND
-			pi.date_confirmed BETWEEN (ar.confirmed_date - INTERVAL '365 days')
-				AND
-					(ar.confirmed_date + INTERVAL'365 days')
-		ORDER BY
-			pi.patient_id, pi.date_confirmed DESC;
+CREATE VIEW patient_heart_disease_indicators AS
+	SELECT DISTINCT ON(pi.patient_id)
+				EXTRACT(YEAR FROM age(current_date, date_of_birth)) AS "Patient Age",
+				pi.hdl AS "HDL Count",
+				pi.ldl AS "LDL Count",
+				pi.triglycerides AS "Triglycerides Count",
+				pi.total_cholesterol AS "Total Cholesterol",
+				pi.systolic AS "Systolic Pressure",
+				pi.diastolic AS "Diastolic Pressure",
+				pi.blood_sugar AS "Blood Sugar Level",
+				CASE
+					WHEN pl.smoking_usage = 'Trying to quit' THEN 'YES'
+					WHEN pl.smoking_usage = 'Used to smoke' THEN 'QUIT'
+					WHEN pl.smoking_usage = 'None' THEN 'NO'
+				END AS "Smoker",
+				CASE
+					WHEN pil.illness_id = 1 THEN i.name
+					WHEN pil.illness_id = 2 THEN i.name
+					WHEN pil.illness_id = 3 THEN i.name
+					ELSE 'No Issues'
+				END AS "Heart Issues"
+			FROM
+				patient p
+			JOIN
+				patient_indicator pi
+			ON
+				p.patient_id = pi.patient_id
+			JOIN
+				patient_lifestyle pl
+			ON
+				pi.patient_id = pl.patient_id
+			LEFT JOIN
+				patient_illness pil
+			ON
+				pi.patient_id = pil.patient_id
+			JOIN
+				illness i
+			ON
+				pil.illness_id = i.illness_id
+			JOIN
+				appointment a
+			ON
+				p.patient_id = a.patient_id
+			JOIN
+				appointment_result ar
+			ON
+				a.appointment_id = ar.appointment_id
+			ORDER BY
+				pi.patient_id, pi.date_confirmed DESC;
 
 ```
 </details>
 
 ![Heart Disease Indicator](Docs/Patient%20Heart%20Disease%20Indicators.png)  
 
-This query collects relevant indicators in regards to heart health from the `patient_indicator` and `patient_lifestyle` entities, then limits the results to patients who have been diagnosed with Coronary Heart Disease. It makes sure that only one set of data from `patient_indicator` per patient is returned and that it is within a certain timeframe from the diagnosis date. Realistically that window would be a lot smaller (e.g 6 months).
+This query collects relevant indicators in regards to heart health from the `patient_indicator` and `patient_lifestyle` entities. It makes sure that only one set of data from `patient_indicator` per patient is returned and that it is within a certain timeframe from the diagnosis date. Realistically that window would be a lot smaller (e.g 6 months).
 
 The purpose of this query is to find any correlation between these indicators and heart disease. The results will best serve a medical analyst in external tools. In PowerBI, analysts can create filters on specific attributes and change the desired range which effects the amount of records displayed.
 
