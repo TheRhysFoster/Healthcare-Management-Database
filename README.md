@@ -1,4 +1,4 @@
-# 🏥 Healthcare Management Database
+# 🏥 Healthcare Management Project
 A PostgreSQL database that handles core hospital operations and medical data by utilizing triggers and functions for necessary automation and indexes for real-world query performance.
 
 **Includes but not limited to:**
@@ -413,59 +413,62 @@ PSQL does automatically index any attribute that uses a `UNIQUE` constraint. Sin
   <summary>🔍 Click To View Query: (Heart Disease Indicators)</summary>
 
 ```sql
-CREATE VIEW
-	patient_heart_disease_indicators AS
-		SELECT DISTINCT ON(pi.patient_id)
-			EXTRACT(YEAR FROM age(current_date, date_of_birth)) AS "Patient Age",
-			pi.hdl AS "HDL Count",
-			pi.ldl AS "LDL Count",
-			pi.triglycerides AS "Triglycerides Count",
-			pi.total_cholesterol AS "Total Cholesterol",
-			pi.systolic AS "Systolic Pressure",
-			pi.diastolic AS "Diastolic Pressure",
-			pi.blood_sugar AS "Blood Sugar Level",
-			CASE
-				WHEN pl.smoking_usage = 'Trying to quit' THEN 'YES'
-				WHEN pl.smoking_usage = 'Used to smoke' THEN 'QUIT'
-				WHEN pl.smoking_usage = 'None' THEN 'NO'
-			END AS "Smoker"
-		FROM
-			patient p
-		JOIN
-			patient_indicator pi
-		ON
-			p.patient_id = pi.patient_id
-		JOIN
-			patient_lifestyle pl
-		ON
-			pi.patient_id = pl.patient_id
-		JOIN
-			patient_illness pil
-		ON
-			pi.patient_id = pil.patient_id
-		JOIN
-			appointment a
-		ON
-			p.patient_id = a.patient_id
-		JOIN
-			appointment_result ar
-		ON
-			a.appointment_id = ar.appointment_id
-		WHERE
-			pil.illness_id = 2
-		AND
-			pi.date_confirmed BETWEEN (ar.confirmed_date - INTERVAL '365 days')
-				AND
-					(ar.confirmed_date + INTERVAL'365 days')
-		ORDER BY
-			pi.patient_id, pi.date_confirmed DESC;
+CREATE VIEW patient_heart_disease_indicators AS
+	SELECT DISTINCT ON(pi.patient_id)
+				EXTRACT(YEAR FROM age(current_date, date_of_birth)) AS "Patient Age",
+				pi.hdl AS "HDL Count",
+				pi.ldl AS "LDL Count",
+				pi.triglycerides AS "Triglycerides Count",
+				pi.total_cholesterol AS "Total Cholesterol",
+				pi.systolic AS "Systolic Pressure",
+				pi.diastolic AS "Diastolic Pressure",
+				pi.blood_sugar AS "Blood Sugar Level",
+				CASE
+					WHEN pl.smoking_usage = 'Trying to quit' THEN 'YES'
+					WHEN pl.smoking_usage = 'Used to smoke' THEN 'QUIT'
+					WHEN pl.smoking_usage = 'None' THEN 'NO'
+				END AS "Smoker",
+				CASE
+					WHEN pil.illness_id = 1 THEN i.name
+					WHEN pil.illness_id = 2 THEN i.name
+					WHEN pil.illness_id = 3 THEN i.name
+					ELSE 'No Issues'
+				END AS "Heart Issues"
+			FROM
+				patient p
+			JOIN
+				patient_indicator pi
+			ON
+				p.patient_id = pi.patient_id
+			JOIN
+				patient_lifestyle pl
+			ON
+				pi.patient_id = pl.patient_id
+			LEFT JOIN
+				patient_illness pil
+			ON
+				pi.patient_id = pil.patient_id
+			JOIN
+				illness i
+			ON
+				pil.illness_id = i.illness_id
+			JOIN
+				appointment a
+			ON
+				p.patient_id = a.patient_id
+			JOIN
+				appointment_result ar
+			ON
+				a.appointment_id = ar.appointment_id
+			ORDER BY
+				pi.patient_id, pi.date_confirmed DESC;
 
 ```
 </details>
 
 ![Heart Disease Indicator](Docs/Patient%20Heart%20Disease%20Indicators.png)  
 
-This query collects relevant indicators in regards to heart health from the `patient_indicator` and `patient_lifestyle` entities, then limits the results to patients who have been diagnosed with Coronary Heart Disease. It makes sure that only one set of data from `patient_indicator` per patient is returned and that it is within a certain timeframe from the diagnosis date. Realistically that window would be a lot smaller (e.g 6 months).
+This query collects relevant indicators in regards to heart health from the `patient_indicator` and `patient_lifestyle` entities. It makes sure that only one set of data from `patient_indicator` per patient is returned and that it is within a certain timeframe from the diagnosis date. Realistically that window would be a lot smaller (e.g 6 months).
 
 The purpose of this query is to find any correlation between these indicators and heart disease. The results will best serve a medical analyst in external tools. In PowerBI, analysts can create filters on specific attributes and change the desired range which effects the amount of records displayed.
 
@@ -582,9 +585,28 @@ This is one example of how a query would work to retrieve a specific staff membe
 
 ## 🖥️ AWS / Linux Server
 
-### 🌐 AWS Instance
+### 🌐 AWS Instance & Ports
 For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions of records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However, for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
 
+In a real world scenario, ports like 5432 (PostgreSQL) and 22 (SSH) will be set to only allow traffic from the company's static IP. When a DBA needs to access either the instance or the database directly, a corporate VPN (e.g Cisco) is used to route traffic through the static IP. On top of this, the VPN will usually require some form of authentication. This is one of the more popular ways to gain access considering many workers who require access won't be on the network with that exact static IP (e.g remote workers, different offices).
+
+Port 443 (HTTPS) will be open to all IPs. This is so any requests made by a user from the system (website / software) can be passed through to the API (e.g Express). The API will need to validate whether the credentials are authenticated, if not it will reject the request.
+
+An example of this is a receptionist booking a new appointment for a patient:
+
+**Frontend URL that is sent through the instance through Port 443:**
+```url
+https://fakenhs.co.uk/api/book_appointment/5/3/27/4/2026-12-26/Scheduled
+```
+
+**Backend that fills the predefined variables with the data from the above URL**
+```js
+app.post('/api/book_appointment/:patient_id/:department_id/:hospital_id/:intervention_id/:appointment_date/:appointment_status', async (req, res) => {
+
+	const{ patient_id, department_id, hospital_id, intervention_id, appointment_date, appointment_status } = req.params;
+
+});
+```
 ### 🛠️ Installing PostgreSQL Packages & Initializing Database
 The first step was to transfer the database dump SQL file (schema, inserts, indexing, stored procedures, triggers and queries) to the server.
 
@@ -707,13 +729,16 @@ echo "alias connect_hosp_db='psql -h localhost -U senior_dba -d hospital_databas
 source ~/.bashrc
 ```
 
-### 🔑 Senior DBA Permission Checklist
+### 🔑 Senior DBA Checklist
 
-1) Can they alter the database?
+**1) Can they alter the database?**
+
 ![Senior DBA Drop Table](Docs/Senior%20DBA%20Drop%20Table.PNG)
 
-2) Check the status of the PostgreSQL Service?
+**2) Check the status of the PostgreSQL Service?**
+
 ![Senior DBA PSQL Status](Docs/Senior%20DBA%20PSQL%20Status.PNG)
 
-3) Update the PSQL Packages?
+**3) Update the PSQL Packages?**
+
 ![Senior DBA PSQL Update](Docs/Senior%20DBA%20PSQL%20Update.PNG)
