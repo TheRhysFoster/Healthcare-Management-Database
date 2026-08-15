@@ -917,7 +917,7 @@ INSERT INTO
 INSERT INTO
 	illness(name, description, severity)
 		VALUES
-			('Heart Failure', 'Heart disease beyond repair', 'High Mortality'),
+			('Cardiomyopathy', 'Disease of the heart muscle that makes it harder for the heart to pump blood to the rest of the body', 'Medium Mortality'),
 			('Coronary Artery Disease', 'Build up of plaque in one or more arteries of the heart', 'Medium Mortality'),
 			('Valve Stenosis', 'Valve unable to open fully limiting bloodflow', 'Medium Mortality'),
 			('Lung Failure', 'Lung issues that are beyond repair', 'High Mortality'),
@@ -12369,6 +12369,9 @@ INSERT INTO
 			(200, 233, 'Under Treatment', '2024-03-03');
 
 INSERT INTO
+	patient_illness()
+
+INSERT INTO
 	hospitalization_cause
 		(hospitalization_id, symptom_id, staff_id) VALUES
 			(1, 11, 3),
@@ -12878,6 +12881,45 @@ INSERT INTO
 			(420, 3, 245, 'Positive', 'Closed', 'Patient was extremely happy with staff member attitude', TRUE),
 			(420, 4, 247, 'Positive', 'Closed', 'Patient praised staff member for being attentive to details', TRUE),
 			(420, 5, 250, 'Negative', 'Closed', 'Patient complained about staff member poor communication', TRUE);
+
+INSERT INTO 
+	patient_illness 
+		(patient_id, illness_id, condition) VALUES
+			(149, 1, 'Stable'),
+			(139, 3, 'Stable'),
+			(120, 1, 'Stable'),
+			(170, 1, 'Stable'),
+			(155, 1, 'Stable'),
+			(74, 3, 'Stable'),
+			(178, 1, 'Stable'),
+			(85, 3, 'Stable'),
+			(19, 3, 'Stable'),
+			(50, 1, 'Stable'),
+			(23, 3, 'Stable'),
+			(198, 3, 'Stable'),
+			(50, 3, 'Stable'),
+			(84, 1, 'Stable'),
+			(164, 3, 'Stable'),
+			(109, 1, 'Stable'),
+			(17, 3, 'Stable'),
+			(120, 3, 'Stable'),
+			(55, 1, 'Stable'),
+			(167, 3, 'Stable'),
+			(171, 3, 'Stable'),
+			(102, 3, 'Stable'),
+			(59, 3, 'Stable'),
+			(20, 3, 'Stable'),
+			(191, 3, 'Stable'),
+			(2, 3, 'Stable'),
+			(56, 1, 'Stable'),
+			(89, 1, 'Stable'),
+			(95, 3, 'Stable'),
+			(3, 3, 'Stable'),
+			(145, 1, 'Stable'),
+			(9, 3, 'Stable'),
+			(47, 3, 'Stable'),
+			(17, 1, 'Stable'),
+			(104, 3, 'Stable');
 
 									
 -- ******************************** DATA INSERTION ENDS HERE ******************************** --
