@@ -474,10 +474,10 @@ The purpose of this query is to find any correlation between these indicators an
 
 For example, placing a filter on 'LDL Count' and slowly reducing the range may cause less results to show. An analyst may conclude that a high amount of LDL is one of the main contributors towards heart health.
 
-![PowerBI Visualization Demonstration](Docs/PowerBI%20Visualization%20Demonstration.png)  
+![PowerBI Visualization Demonstration](Docs/PowerBI%20Visualization%20Demonstration.gif) 
 
 <div align="center">
-*A visualisation put together in PowerB.I for this specific view*
+*An interactive visualisation formed in PowerB.I using Biomarkers to filter heart health results*
 </div>
 
 ### 🩺 Heart Disease Symptoms
