@@ -472,8 +472,13 @@ This query collects relevant indicators in regards to heart health from the `pat
 
 The purpose of this query is to find any correlation between these indicators and heart disease. The results will best serve a medical analyst in external tools. In PowerBI, analysts can create filters on specific attributes and change the desired range which effects the amount of records displayed.
 
-For example, placing a filter on 'LDL Count' and slowly reducing the range may cause less results to show. An analyst may conclude that a high amount of LDL is one of the contributors towards this specific heart condition.
+For example, placing a filter on 'LDL Count' and slowly reducing the range may cause less results to show. An analyst may conclude that a high amount of LDL is one of the main contributors towards heart health.
 
+![PowerBI Visualization Demonstration](Docs/PowerBI%20Visualization%20Demonstration.png)  
+
+<div align="center">
+*A visualisation put together in PowerB.I for this specific view*
+</div>
 
 ### 🩺 Heart Disease Symptoms
 <details>
