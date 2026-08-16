@@ -474,7 +474,8 @@ The purpose of this query is to find any correlation between these indicators an
 
 For example, placing a filter on 'LDL Count' and slowly reducing the range may cause less results to show. An analyst may conclude that a high amount of LDL is one of the main contributors towards heart health.
 
-To extract the data in CSV format ready for analytical tools:
+**To extract the data in CSV format ready for analytical tools:**
+
 ```sql
 \copy (SELECT * FROM patient_heart_disease_indicators) TO 'C:/Users/Rhys/Documents/GitHub/Hospital-Project/CSV/patient_heart_disease_indicators.csv' WITH (FORMAT csv, HEADER true);
 ```
