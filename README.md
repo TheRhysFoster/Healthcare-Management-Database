@@ -406,7 +406,7 @@ Attributes that are in `JOINs` OR `WHERE` clauses when querying have been indexe
 PSQL does automatically index any attribute that uses a `UNIQUE` constraint. Since the database is not live / in use, the `CONCURRENTLY` option was not used as there is not a risk of blocking WRITEs at this time.
 
 
-## 🔍 Queries & Views
+## 🔍 Views, Queries & Data Visualisations
 
 ### 🩺 Heart Disease Indicator
 <details>
