@@ -598,7 +598,7 @@ This is one example of how a query would work to retrieve a specific staff membe
 
 ## 🖥️ AWS / Linux Server
 
-### 🌐 AWS Instance & Ports
+### 🌐 Cloud Server & Port Configuration
 For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions of records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However, for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
 
 In a real world scenario, ports like 5432 (PostgreSQL) and 22 (SSH) will be set to only allow traffic from the company's static IP. When a DBA needs to access either the instance or the database directly, a corporate VPN (e.g Cisco) is used to route traffic through the static IP. On top of this, the VPN will usually require some form of authentication. This is one of the more popular ways to gain access considering many workers who require access won't be on the network with that exact static IP (e.g remote workers, different offices).
