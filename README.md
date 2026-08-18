@@ -1,17 +1,22 @@
 # 🏥 Healthcare Management Project
 A PostgreSQL database project designed to handle core hospital operations and medical data, incorporating triggers and functions for process automation, custom user permissions on a Linux server, and data exports for analysis.
 
-Includes:
+**Includes:**
 
-**Data Modelling & Structure** – Designed the schema and ERD using primary/foreign keys, normalized tables, and junction tables to handle many-to-many relationships without data redundancy.
+*Data Modelling & Structure*
+Designed the schema and ERD using primary/foreign keys, normalized tables, and junction tables to handle many-to-many relationships without data redundancy.
 
-**Relational Scope** – Built tables covering patient health indicators and lifestyle, staff performance and job details, appointment diagnostics, and hospital stock inventory.
+*Relational Scope*
+Built tables covering patient health indicators and lifestyle, staff performance and job details, appointment diagnostics, and hospital stock inventory.
 
-**Automation & Performance** – Wrote SQL triggers and functions to handle automated stock deductions and performance tracking, using indexes on foreign keys and frequently filtered WHERE clause columns for query performance.
+*Automation & Performance*
+Wrote SQL triggers and functions to handle automated stock deductions and performance tracking, using indexes on foreign keys and frequently filtered WHERE clause columns for query performance.
 
-**Queries & Visualisations** – Executed analytical SQL queries using aggregations and filters like DISTINCT, exporting data into Power BI to create visualisations.
+*Queries & Visualisations*
+Executed analytical SQL queries using aggregations and filters like DISTINCT, exporting data into Power BI to create visualisations.
 
-**Deployment & Security** – Deployed the database onto an AWS Linux server, configuring database user roles and Linux permissions based on the principle of least privilege.
+*Deployment & Security*
+Deployed the database onto an AWS Linux server, configuring database user roles and Linux permissions based on the principle of least privilege.
 
 
 ## 🗺️ Entity Relationship Diagram
