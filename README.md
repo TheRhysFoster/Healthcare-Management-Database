@@ -1,15 +1,17 @@
 # 🏥 Healthcare Management Project
-A PostgreSQL database that handles core hospital operations and medical data by utilizing triggers and functions for necessary automation and indexes for real-world query performance.
+A PostgreSQL database project designed to handle core hospital operations and medical data, incorporating triggers and functions for process automation, custom user permissions on a Linux server, and data exports for analysis.
 
-**Includes but not limited to:**
+**Includes:**
 
-- **Patient Health** - (demographics, health indicators such as lipids / blood pressure / weight and lifestyle choices such as smoking usage, alcohol consumption, diet and exercise)
+**Data Modelling & Structure** - Designed the schema and ERD using primary/foreign keys, normalized tables, and junction tables to handle many-to-many relationships without data redundancy.
 
-- **Staff Management & Performance** - (demographics, automated staff performance tracking including patient feedback / staff punctuality and profession data such as salary / employment type / work location)
+**Relational Scope** - Built tables covering patient health indicators and lifestyle, staff performance and job details, appointment diagnostics, and hospital stock inventory.
 
--  **Appointments & Diagnostics** - (medical interventions, illness outcomes, appointment findings and patient's original symptoms)
+**Automation & Performance** - Wrote SQL triggers and functions to handle automated stock deductions and performance tracking, using indexes on foreign keys and frequently filtered WHERE clause columns for query performance.
 
-- **Stock Management** - (inventory tracking and automated deductions of stock per appointment or prescription for each hospital)
+**Queries & Visualisations** - Executed analytical SQL queries using aggregations and filters like DISTINCT, exporting data into Power BI to create visualisations.
+
+**Deployment & Security** - Deployed the database onto an AWS Linux server, configuring database user roles and Linux permissions based on the principle of least privilege.
 
 
 ## 🗺️ Entity Relationship Diagram
@@ -406,7 +408,7 @@ Attributes that are in `JOINs` OR `WHERE` clauses when querying have been indexe
 PSQL does automatically index any attribute that uses a `UNIQUE` constraint. Since the database is not live / in use, the `CONCURRENTLY` option was not used as there is not a risk of blocking WRITEs at this time.
 
 
-## 🔍 Queries & Views
+## 🔍 Views, Queries & Data Visualisations
 
 ### 🩺 Heart Disease Indicator
 <details>
@@ -473,6 +475,12 @@ This query collects relevant indicators in regards to heart health from the `pat
 The purpose of this query is to find any correlation between these indicators and heart disease. The results will best serve a medical analyst in external tools. In PowerBI, analysts can create filters on specific attributes and change the desired range which effects the amount of records displayed.
 
 For example, placing a filter on 'LDL Count' and slowly reducing the range may cause less results to show. An analyst may conclude that a high amount of LDL is one of the main contributors towards heart health.
+
+**To extract the data in CSV format ready for analytical tools:**
+
+```sql
+\copy (SELECT * FROM patient_heart_disease_indicators) TO 'C:/Users/Rhys/Documents/GitHub/Hospital-Project/CSV/patient_heart_disease_indicators.csv' WITH (FORMAT csv, HEADER true);
+```
 
 ![PowerBI Visualization Demonstration](Docs/PowerBI%20Visualization%20Demonstration.gif) 
 
@@ -592,7 +600,7 @@ This is one example of how a query would work to retrieve a specific staff membe
 
 ## 🖥️ AWS / Linux Server
 
-### 🌐 AWS Instance & Ports
+### 🌐 Cloud Server & Port Configuration
 For server hosting I selected an AWS EC2 instance with the `t3.micro` configuration running Ubuntu. In reality, if the database was live and contained millions of records along with thousands of concurrent staff connections (via Front-End + API), then this configuration is nowhere near what is required to prevent slowdowns, WRITE locks and a loss of service. However, for the purpose of this project, it is more than enough to demonstrate foundational tasks such as hosting the database on a live server, setting up user roles with permissions and writing bash scripts.
 
 In a real world scenario, ports like 5432 (PostgreSQL) and 22 (SSH) will be set to only allow traffic from the company's static IP. When a DBA needs to access either the instance or the database directly, a corporate VPN (e.g Cisco) is used to route traffic through the static IP. On top of this, the VPN will usually require some form of authentication. This is one of the more popular ways to gain access considering many workers who require access won't be on the network with that exact static IP (e.g remote workers, different offices).
