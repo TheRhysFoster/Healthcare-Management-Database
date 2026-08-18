@@ -1,15 +1,17 @@
 # 🏥 Healthcare Management Project
-A PostgreSQL database that handles core hospital operations and medical data by utilizing triggers and functions for necessary automation and indexes for real-world query performance.
+A PostgreSQL database project designed to handle core hospital operations and medical data, incorporating triggers and functions for process automation, custom user permissions on a Linux server, and data exports for analysis.
 
-**Includes but not limited to:**
+Includes:
 
-- **Patient Health** - (demographics, health indicators such as lipids / blood pressure / weight and lifestyle choices such as smoking usage, alcohol consumption, diet and exercise)
+**Data Modelling & Structure** – Designed the schema and ERD using primary/foreign keys, normalized tables, and junction tables to handle many-to-many relationships without data redundancy.
 
-- **Staff Management & Performance** - (demographics, automated staff performance tracking including patient feedback / staff punctuality and profession data such as salary / employment type / work location)
+**Relational Scope** – Built tables covering patient health indicators and lifestyle, staff performance and job details, appointment diagnostics, and hospital stock inventory.
 
--  **Appointments & Diagnostics** - (medical interventions, illness outcomes, appointment findings and patient's original symptoms)
+**Automation & Performance** – Wrote SQL triggers and functions to handle automated stock deductions and performance tracking, using indexes on foreign keys and frequently filtered WHERE clause columns for query performance.
 
-- **Stock Management** - (inventory tracking and automated deductions of stock per appointment or prescription for each hospital)
+**Queries & Visualisations** – Executed analytical SQL queries using aggregations and filters like DISTINCT, exporting data into Power BI to create visualisations.
+
+**Deployment & Security** – Deployed the database onto an AWS Linux server, configuring database user roles and Linux permissions based on the principle of least privilege.
 
 
 ## 🗺️ Entity Relationship Diagram
